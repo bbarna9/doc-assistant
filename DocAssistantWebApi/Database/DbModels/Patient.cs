@@ -16,6 +16,7 @@ namespace DocAssistantWebApi.Database.DbModels
                 FirstName = patient.FirstName,
                 LastName =  patient.LastName,
                 SSN = patient.SSN.ToString(),
+                Country = patient.Address.Country, // ! 
                 DateOfBirth = patient.DateOfBirth
             };
         }
