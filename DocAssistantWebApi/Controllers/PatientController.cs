@@ -10,9 +10,12 @@ namespace DocAssistantWebApi.Controllers
         [HttpGet]
         public ActionResult<Patient> Get()
         {
-            return Ok();
+            return Ok(
+                new Patient()
+            );
         }
 
+        [Produces("application/json")]
         [HttpPost]
         public ActionResult<Patient> Save()
         {
