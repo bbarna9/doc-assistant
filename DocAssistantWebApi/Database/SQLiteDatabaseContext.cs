@@ -18,6 +18,6 @@ namespace DocAssistantWebApi.Database
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseSqlite(this.connectionString); // TODO: use config file connection string
+            => options.UseSqlite(this.connectionString); 
     }
 }
