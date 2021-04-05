@@ -8,9 +8,9 @@ namespace DocAssistantWebApi.Utils
     {
         private const int SaltSize = 10;
         
-        private static byte[] GenerateRandomSalt()
+        private static byte[] GenerateRandomSalt(int size = SaltSize)
         {
-            byte [] salt = new byte[SaltSize];
+            byte [] salt = new byte[size];
             
             RNGCryptoServiceProvider serviceProvider = new RNGCryptoServiceProvider();
             serviceProvider.GetBytes(salt);
