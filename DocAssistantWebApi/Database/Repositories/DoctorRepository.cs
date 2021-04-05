@@ -1,19 +1,30 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
 using DocAssistantWebApi.Database.DbModels;
+using Microsoft.EntityFrameworkCore;
 
-namespace DocAssistantWebApi.Database.DataAccess
+namespace DocAssistantWebApi.Database.Repositories
 {
-    public class DoctorDataAccess : IDataAccess<Doctor>
+    public class DoctorRepository : IRepository<Doctor>
     {
         public async Task<Doctor> Get(Doctor entity)
         {
-            Patient patient = null;
+            Doctor doctor = null;
             
             await using var ctx = new SQLiteDatabaseContext();
             
-            patient = (Patient) await ctx.Patients.FindAsync(entity);
+            doctor = (Doctor) await ctx.Doctors.FindAsync(entity);
+            
+            return doctor;
+        }
 
-            return patient;
+        public async Task<Doctor> Where(Expression<Func<Doctor,bool>> expression)
+        {
+            await using var ctx = new SQLiteDatabaseContext();
+
+            return await ctx.Doctors.Where(expression).FirstOrDefaultAsync();
         }
 
         public Task<Doctor> GetById(long id)
@@ -26,9 +37,12 @@ namespace DocAssistantWebApi.Database.DataAccess
             throw new System.NotImplementedException();
         }
 
-        public Task Save(Doctor entity)
+        public async Task Save(Doctor entity)
         {
-            throw new System.NotImplementedException();
+            await using var ctx = new SQLiteDatabaseContext();
+            
+            await ctx.AddAsync(entity);
+            await ctx.SaveChangesAsync();
         }
     }
 }
