@@ -9,12 +9,12 @@ namespace DocAssistant_Common.Models
     {
         public long Id { get; set; }
         
-        [NameValidation(minLength:1,maxLength:50)] public string FirstName { get; set; }
-        [NameValidation(minLength:1,maxLength:50)] public string LastName { get; set; }
-        [AddressValidation] public Address Address { get; set; }
-        [SSNValidation] public StringBuilder SSN { get; set; }
+        [Required] [NameValidation(minLength:1,maxLength:50)] public string FirstName { get; set; }
+        [Required] [NameValidation(minLength:1,maxLength:50)] public string LastName { get; set; }
+        [Required] [AddressValidation] public Address Address { get; set; }
+        [Required] [SSNValidation] public string SSN { get; set; }
         
-        public DateTime DateOfBirth { get; set; }
+        [Required] public DateTime DateOfBirth { get; set; }
 
         public Patient()
         {
