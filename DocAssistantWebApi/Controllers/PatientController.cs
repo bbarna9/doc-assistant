@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using DocAssistant_Common.Models;
+using DocAssistantWebApi.Filters;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DocAssistantWebApi.Controllers
 {
@@ -15,9 +17,10 @@ namespace DocAssistantWebApi.Controllers
             );
         }
 
+        [Authorize(Policy = "DoctorAuth")]
         [Produces("application/json")]
         [HttpPost]
-        public ActionResult<Patient> Save()
+        public ActionResult Save(/*[FromBody] Patient patient*/)
         {
             return Ok();
         }
