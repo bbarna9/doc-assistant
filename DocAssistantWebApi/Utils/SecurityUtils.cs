@@ -25,21 +25,13 @@ namespace DocAssistantWebApi.Utils
             return $"${SaltSize}${Convert.ToHexString(salt)}${hashedPassword}";
         }
 
-        private static bool TimingSafeEquals(byte[] a, byte[] b)
-        {
-            // Nincs built in (source) => https://social.msdn.microsoft.com/Forums/en-US/44498a4f-4649-4f1a-8f91-d7c8ab65d132/securestring-comparing-and-timing-attacks?forum=csharpgeneral
-            
-            uint diff = (uint)a.Length ^ (uint)b.Length;
-            for (int i = 0; i < a.Length && i < b.Length; i++)
-                diff |= (uint)(a[i] ^ b[i]);
-            
-            return diff == 0;
-        }
-        
         public static string HashStringHex(byte [] str,byte[] key) => Convert.ToHexString(new HMACSHA256(key).ComputeHash(str));
 
         public static string CreatePasswordHash(string password, byte[] salt) =>
             CreatePasswordHashUtil(salt, Encoding.Default.GetBytes(password));
+
+        public static string CreatePasswordHash(string password) =>
+            CreatePasswordHashUtil(GenerateRandomSalt(), Encoding.Default.GetBytes(password));
 
         public static bool VerifyPassword(string plain, string stored)
         {
