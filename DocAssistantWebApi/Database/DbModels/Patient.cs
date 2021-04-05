@@ -7,7 +7,7 @@ namespace DocAssistantWebApi.Database.DbModels
 {
     public class Patient : Person
     {
-        [Key] public string SSN { get; set; }
+        public string SSN { get; set; }
 
         public static explicit operator Patient(PatientModel patient)
         {
@@ -15,7 +15,7 @@ namespace DocAssistantWebApi.Database.DbModels
             {
                 FirstName = patient.FirstName,
                 LastName =  patient.LastName,
-                SSN = patient.SSN.ToString(),
+                SSN = patient.SSN,
                 Country = patient.Address.Country, // ! 
                 DateOfBirth = patient.DateOfBirth
             };
@@ -28,7 +28,7 @@ namespace DocAssistantWebApi.Database.DbModels
                 Id = patient.Id,
                 FirstName = patient.FirstName,
                 LastName = patient.LastName,
-                SSN = new StringBuilder(patient.SSN),
+                SSN = patient.SSN,
                 DateOfBirth = patient.DateOfBirth
                 
             };

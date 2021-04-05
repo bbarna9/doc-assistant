@@ -6,7 +6,7 @@ namespace DocAssistantWebApi.Database.DbModels
 {
     public class Doctor : Person
     {
-        [Key] public string Username { get; set; }
+        public string Username { get; set; }
         public string Password { get; set; }
         
         public List<Patient> Patients { get; set; }
