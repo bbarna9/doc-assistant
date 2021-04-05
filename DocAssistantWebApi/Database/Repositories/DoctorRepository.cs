@@ -5,11 +5,11 @@ namespace DocAssistantWebApi.Database.DataAccess
 {
     public class DoctorDataAccess : IDataAccess<Doctor>
     {
-        public Task<Doctor> Get(Doctor entity)
+        public async Task<Doctor> Get(Doctor entity)
         {
             Patient patient = null;
             
-            await using var ctx = new SQLiteDatabaseContext(this.connectionString);
+            await using var ctx = new SQLiteDatabaseContext();
             
             patient = (Patient) await ctx.Patients.FindAsync(entity);
 

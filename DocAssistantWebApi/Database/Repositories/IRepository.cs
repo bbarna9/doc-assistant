@@ -2,7 +2,7 @@
 
 namespace DocAssistantWebApi.Database.DataAccess
 {
-    public interface IDataAccess<T> where T : class
+    public interface IRepository<T> where T : class
     {
         Task<T> Get(T entity);
         Task<T> GetById(long id);

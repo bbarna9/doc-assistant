@@ -6,20 +6,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DocAssistantWebApi.Database.DataAccess
 {
-    public class PatientDataAccess : IDataAccess<Patient>
+    public class PatientRepository : IDataAccess<Patient>
     {
-        private readonly string connectionString;
-        
-        public PatientDataAccess(string connectionString)
+        public PatientDataAccess()
         {
-            this.connectionString = connectionString;
         }
         
         public async Task<Patient> Get(Patient entity)
         {
             Patient patient = null;
             
-            await using var ctx = new SQLiteDatabaseContext(this.connectionString);
+            await using var ctx = new SQLiteDatabaseContext();
             
             patient = (Patient) await ctx.Patients.FindAsync(entity);
 
