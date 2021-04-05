@@ -21,6 +21,7 @@ x64/
 [Bb]uild[Ll]og.*
 
 Migrations/
+*.db
 
 *_i.c
 *_p.c
