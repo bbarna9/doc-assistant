@@ -2,8 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Mvc;
+using DocAssistantWebApi.Database;
+using DocAssistantWebApi.Database.DbModels;
+using DocAssistantWebApi.Database.Repositories;
+using DocAssistantWebApi.Filters;
+using DocAssistantWebApi.Services.Auth;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -11,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Patient = DocAssistant_Common.Models.Patient;
 
 namespace DocAssistantWebApi
 {
@@ -31,6 +39,16 @@ namespace DocAssistantWebApi
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "DocAssistantWebApi", Version = "v1"});
             });
+
+            services.AddSingleton<IRepository<Doctor>, DoctorRepository>();
+            services.AddSingleton<IRepository<Database.DbModels.Patient>, PatientRepository>();
+            services.AddSingleton<IAuthService, AuthService>();
+            
+           /* services.AddAuthorization(options =>
+                options.AddPolicy("DoctorAuth", policy => policy.Requirements.Add(new DoctorAuthRequirement()))
+            );*/
+            
+            SQLiteDatabaseContext.ConnectionString = Configuration.GetConnectionString("SQLiteDatabase");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -46,7 +64,7 @@ namespace DocAssistantWebApi
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
+            
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
