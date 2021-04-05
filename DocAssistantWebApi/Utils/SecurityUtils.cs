@@ -50,7 +50,35 @@ namespace DocAssistantWebApi.Utils
             string storedPassword = splitted[3];
             var plainHashed = HashStringHex(Encoding.Default.GetBytes(plain),salt);
 
-            return TimingSafeEquals(Encoding.Default.GetBytes(storedPassword), Encoding.Default.GetBytes(plainHashed));
+            return storedPassword.Equals(plainHashed);
+        }
+
+        public static string GenerateAccessToken(long doctorId)
+        {
+            var salt = GenerateRandomSalt(32);
+
+            var idBytes = BitConverter.GetBytes(doctorId);
+
+            return Convert.ToHexString(idBytes)+"."+HashStringHex(salt, idBytes);
+        }
+
+        public static bool VerifyAccessToken(Dictionary<long, string> accessTokens,string accessToken,out long resultDocId)
+        {
+            resultDocId = -1;
+            
+            var splitted = accessToken.Split('.');
+            
+            if (splitted.Length != 2) return false;
+
+            var docIdBytes = Convert.FromHexString(splitted[0]);
+            
+            long docId = BitConverter.ToInt64(docIdBytes);
+
+            if (!accessTokens.ContainsKey(docId)) return false;
+
+            resultDocId = docId;
+            
+            return accessTokens[docId].Equals(splitted[1]);
         }
     }
 }
