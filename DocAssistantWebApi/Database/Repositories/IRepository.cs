@@ -9,6 +9,7 @@ namespace DocAssistantWebApi.Database.Repositories
     {
         Task<T> Get(T entity);
         Task<T> GetById(long id);
+        Task UpdateChangedProperties(T entity);
         Task Update(T entity);
         Task Save(T entity);
         Task<T> Where(Expression<Func<T, bool>> expression);
