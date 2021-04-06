@@ -10,6 +10,8 @@ namespace DocAssistant_Common.Models
     {
         public long Id { get; set; }
         
+        [ForeignKey("DoctorId")] public long DoctorId { get; set; }
+
         [Required] 
         [CommonValidation("^[^~!@#$%^&*\\(\\)-=_+\\{\\}\\[\\];\\\":<>\\/?,.|\\\\]{1,50}$")] 
         public string FirstName { get; set; }
