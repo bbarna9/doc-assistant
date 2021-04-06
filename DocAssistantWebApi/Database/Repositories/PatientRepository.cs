@@ -1,5 +1,7 @@
 ﻿
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -17,17 +19,6 @@ namespace DocAssistantWebApi.Database.Repositories
             await using var ctx = new SQLiteDatabaseContext();
             
             patient = (Patient) await ctx.Patients.FindAsync(entity);
-
-            return patient;
-        }
-
-        public async Task<Patient> GetById(long id)
-        {
-            Patient patient = null;
-            
-            await using var ctx = new SQLiteDatabaseContext();
-            
-            patient = await ctx.Patients.FindAsync(new Patient{ Id = id});
 
             return patient;
         }
@@ -67,7 +58,16 @@ namespace DocAssistantWebApi.Database.Repositories
 
         public async Task<Patient> Where(Expression<Func<Patient,bool>> expression)
         {
-            throw new NotImplementedException();
+            await using var ctx = new SQLiteDatabaseContext();
+
+            return await ctx.Patients.FirstOrDefaultAsync(expression);
+        }
+
+        public async Task<IEnumerable<Patient>> WhereMulti(Expression<Func<Patient, bool>> expression)
+        {
+            await using var ctx = new SQLiteDatabaseContext();
+
+            return await ctx.Patients.Where(expression).ToListAsync();
         }
     }
 }

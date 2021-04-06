@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -26,11 +27,6 @@ namespace DocAssistantWebApi.Database.Repositories
             await using var ctx = new SQLiteDatabaseContext();
 
             return await ctx.Doctors.FirstOrDefaultAsync(expression);
-        }
-
-        public Task<Doctor> GetById(long id)
-        {
-            throw new System.NotImplementedException();
         }
 
         public async Task UpdateChangedProperties(Doctor entity)
@@ -63,6 +59,12 @@ namespace DocAssistantWebApi.Database.Repositories
             
             await ctx.AddAsync(entity);
             await ctx.SaveChangesAsync();
+        }
+        public async Task<IEnumerable<Doctor>> WhereMulti(Expression<Func<Doctor, bool>> expression)
+        {
+            await using var ctx = new SQLiteDatabaseContext();
+
+            return await ctx.Doctors.Where(expression).ToListAsync();
         }
     }
 }
