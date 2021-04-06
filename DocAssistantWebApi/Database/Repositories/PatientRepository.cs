@@ -3,7 +3,7 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using DocAssistantWebApi.Database.DbModels;
+using DocAssistant_Common.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DocAssistantWebApi.Database.Repositories
@@ -27,9 +27,14 @@ namespace DocAssistantWebApi.Database.Repositories
             
             await using var ctx = new SQLiteDatabaseContext();
             
-            patient = (Patient) await ctx.Patients.FindAsync(new Patient{ Id = id});
+            patient = await ctx.Patients.FindAsync(new Patient{ Id = id});
 
             return patient;
+        }
+
+        public Task UpdateChangedProperties(Patient entity)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task Update(Patient entity)
@@ -49,10 +54,17 @@ namespace DocAssistantWebApi.Database.Repositories
         
         public async Task Save(Patient entity)
         {
-            using (var ctx = new SQLiteDatabaseContext())
-                await ctx.Patients.AddAsync(entity);
+            await using var ctx = new SQLiteDatabaseContext();
+
+            await ctx.AddAsync(entity);
+            await ctx.SaveChangesAsync();
         }
-        
+
+        public Task Patch(Patient entity)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<Patient> Where(Expression<Func<Patient,bool>> expression)
         {
             throw new NotImplementedException();

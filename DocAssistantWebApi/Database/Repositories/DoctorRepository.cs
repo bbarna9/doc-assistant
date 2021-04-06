@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
-using DocAssistantWebApi.Database.DbModels;
 using Microsoft.EntityFrameworkCore;
+using DocAssistant_Common.Models;
 
 namespace DocAssistantWebApi.Database.Repositories
 {
@@ -24,7 +25,7 @@ namespace DocAssistantWebApi.Database.Repositories
         {
             await using var ctx = new SQLiteDatabaseContext();
 
-            return await ctx.Doctors.Where(expression).FirstOrDefaultAsync();
+            return await ctx.Doctors.FirstOrDefaultAsync(expression);
         }
 
         public Task<Doctor> GetById(long id)
@@ -32,11 +33,30 @@ namespace DocAssistantWebApi.Database.Repositories
             throw new System.NotImplementedException();
         }
 
-        public Task Update(Doctor entity)
+        public async Task UpdateChangedProperties(Doctor entity)
         {
-            throw new System.NotImplementedException();
+            await using var ctx = new SQLiteDatabaseContext();
+            
+            var doctor = await ctx.Doctors.FirstOrDefaultAsync(doctor => doctor.Id == entity.Id);
+
+            var updatedProperties = IRepository<Doctor>.GetUpdatedProperties(entity);
+
+            foreach (var property in updatedProperties)
+            {
+                doctor.GetType().GetProperty(property.Item1, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase | BindingFlags.NonPublic)
+                    ?.SetValue(doctor,property.Item2);
+            }
+
+            await ctx.SaveChangesAsync();
         }
 
+        public async Task Update(Doctor entity)
+        {
+            await using var ctx = new SQLiteDatabaseContext();
+            ctx.Update(entity);
+            await ctx.SaveChangesAsync();
+        }
+        
         public async Task Save(Doctor entity)
         {
             await using var ctx = new SQLiteDatabaseContext();
