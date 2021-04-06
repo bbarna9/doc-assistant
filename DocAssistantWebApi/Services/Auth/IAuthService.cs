@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using DocAssistantWebApi.Database.DbModels;
+using DocAssistant_Common.Models;
 
 namespace DocAssistantWebApi.Services.Auth
 {
@@ -7,7 +7,7 @@ namespace DocAssistantWebApi.Services.Auth
     {
         public Task<Doctor> Auth(string username, string password);
         public Task<string> GenerateAccessToken(Doctor doctor);
-        public Task<bool> Authorize(string accessToken);
+        public Task<(bool, long)> Authorize(string accessToken);
         public Task<bool> Logout(string accessToken);
     }
 }

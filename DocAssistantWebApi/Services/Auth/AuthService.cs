@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
-using DocAssistantWebApi.Database.DbModels;
 using DocAssistantWebApi.Database.Repositories;
 using DocAssistantWebApi.Utils;
 using System.Collections.Generic;
 using System.Security.Policy;
+using DocAssistant_Common.Models;
 
 namespace DocAssistantWebApi.Services.Auth
 {
@@ -43,18 +43,17 @@ namespace DocAssistantWebApi.Services.Auth
             return token;
         }
 
-        public async Task<bool> Authorize(string accessToken)
+        public async Task<(bool, long)> Authorize(string accessToken)
         {
-            return SecurityUtils.VerifyAccessToken(_accessTokens, accessToken,out _);
+            return SecurityUtils.VerifyAccessToken(_accessTokens, accessToken);
         }
         
         public async Task<bool> Logout(string accessToken)
         {
-            long docId;
-            
-            if(!SecurityUtils.VerifyAccessToken(_accessTokens, accessToken,out docId)) return false;
+            var result = SecurityUtils.VerifyAccessToken(_accessTokens, accessToken);
+            if(!result.Item1) return false;
 
-            this._accessTokens.Remove(docId);
+            this._accessTokens.Remove(result.Item2);
 
             return true;
         }
