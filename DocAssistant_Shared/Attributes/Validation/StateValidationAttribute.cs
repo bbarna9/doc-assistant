@@ -12,6 +12,8 @@ namespace DocAssistant_Common.Attributes
         {
             var state = (string) value;
 
+            if (state == null) return false;
+
             if (state.Length < MinLength || state.Length > MaxLength) return false;
             
             foreach (var invalidChar in InvalidCharacters)

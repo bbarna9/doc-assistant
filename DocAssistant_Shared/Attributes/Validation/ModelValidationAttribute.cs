@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace DocAssistant_Common.Attributes
 {
@@ -10,6 +11,8 @@ namespace DocAssistant_Common.Attributes
         public int MaxLength { get; set; }
         
         public char [] InvalidCharacters { get; set; }
+        
+        public Regex pattern { get; set; }
 
         /// <summary>
         /// <para>Tuple.Item1 = PropertyName</para>
@@ -30,6 +33,11 @@ namespace DocAssistant_Common.Attributes
         {
             this.MinLength = minLength;
             this.MaxLength = maxLength;
+        }
+
+        protected ModelValidationAttribute(string pattern)
+        {
+            this.pattern = new Regex(pattern);
         }
 
         protected ModelValidationAttribute(int minLength, int maxLength, char[] invalidCharacters) : this(minLength,maxLength)

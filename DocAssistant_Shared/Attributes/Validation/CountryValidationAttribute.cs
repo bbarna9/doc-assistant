@@ -12,6 +12,8 @@ namespace DocAssistant_Common.Attributes
         {
             string country = (string) value;
 
+            if (country == null) return false;
+
             return countryRegex.IsMatch(country);
         }
     }

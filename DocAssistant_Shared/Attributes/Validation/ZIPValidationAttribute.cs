@@ -11,6 +11,8 @@ namespace DocAssistant_Common.Attributes
         {
             var zip = (string) value;
 
+            if (zip == null) return false;
+            
             return zip.Length <= this.MaxLength && zip.Length >= this.MinLength;
         }
     }

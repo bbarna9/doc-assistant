@@ -12,6 +12,8 @@ namespace DocAssistant_Common.Attributes
         {
             var city = (string) value;
 
+            if (city == null) return false;
+
             if (city.Length < MinLength || city.Length > MaxLength) return false;
 
             foreach (var invalidChar in InvalidCharacters)
