@@ -52,9 +52,20 @@ namespace DocAssistantWebApi.Controllers
             return Ok();
         }
 
-       /* public async Task<ActionResult> UpdatePatientData()
+        [Produces("application/json")]
+        [Route("api/patient")]
+        [HttpPatch]
+        public async Task<ActionResult> UpdateData([FromHeader(Name = "Authorization")] string token,[FromBody] Patient patient)
         {
-            throw new NotImplementedException();
-        }*/
+            var result = await this._authService.Authorize(token);
+
+            if (!result.Item1)
+            {
+                return Unauthorized();
+            }
+
+            await this._patientRepository.Update(patient);
+            
+            return Ok();
     }
 }
