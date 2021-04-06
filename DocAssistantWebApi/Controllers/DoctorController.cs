@@ -57,5 +57,22 @@ namespace DocAssistantWebApi.Controllers
             
             return Ok();
         }
+
+        [Route("/api/doc/update")]
+        [Produces("application/json")]
+        [HttpPatch]
+        public async Task<ActionResult> UpdateData([FromHeader(Name = "Authorization")] string accessToken,[FromBody] Doctor data)
+        {
+            var result = await this._authService.Authorize(accessToken);
+            
+            if (!result.Item1)
+                return Unauthorized();
+
+            data.Id = result.Item2;
+            
+            await this._repository.Update(data);
+
+            return Ok();
+        }
     }
 }
