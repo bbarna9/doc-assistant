@@ -2,7 +2,7 @@
 
 namespace DocAssistant_Common.Models
 {
-    public struct Address
+    public class Address
     {
         [CountryValidation] 
         public string Country { get; set; }
@@ -10,7 +10,7 @@ namespace DocAssistant_Common.Models
         public string State { get; set; }
         [CityValidation(minLength:1, maxLength: 255, invalidCharacters: new char[] {'~','!','@','#','$','%','^','&','*','(',')','_','=','+','{','}',';','\"','<','>','?','\\','/','.','|'} )] 
         public string City { get; set; }
-        [StreetValidation(minLength: 1, maxLength: 255)] 
+       // [CommonValidation(minLength: 1, maxLength: 255)] 
         public string Street { get; set; }
         [ZIPValidation(minLength: 1, maxLength: 10)] 
         public string ZIP { get; set; }
