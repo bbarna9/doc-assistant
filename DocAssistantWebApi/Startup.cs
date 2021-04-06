@@ -62,8 +62,6 @@ namespace DocAssistantWebApi
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "DocAssistantWebApi v1"));
             }
 
-           
-
             app.UseHttpsRedirection();
 
             app.UseRouting();
