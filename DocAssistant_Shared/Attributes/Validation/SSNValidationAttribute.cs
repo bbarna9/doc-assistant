@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -24,13 +25,24 @@ namespace DocAssistant_Common.Attributes
         public override bool IsValid([NotNull] object value)
         {
             // Default: 000-000-000 -> length: 11
-            
-            StringBuilder ssn = (StringBuilder) value;
+
+            if (value == null) return false;
+
+            string ssn = (string) value;
 
             if (ssn.Length != 11) return false;
 
-            foreach (var character in ssn.GetChunks())
+            int n = 0;
+            
+            foreach (var character in ssn)
             {
+                if (++n % 4 == 0)
+                {
+                    if (character != '-') return false;
+
+                    continue;
+                }
+                
                 if (!allowedPattern.IsMatch(character.ToString())) return false;
             }
             
