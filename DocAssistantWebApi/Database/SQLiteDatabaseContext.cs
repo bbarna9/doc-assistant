@@ -16,6 +16,11 @@ namespace DocAssistantWebApi.Database
             modelBuilder.Entity<Patient>()
                 .HasIndex(patient => patient.SSN)
                 .IsUnique();
+            
+           /* modelBuilder.Entity<Patient>()
+                .HasOne(patient => patient.Doctor)
+                .WithMany(doctor => doctor.Patients)
+                .HasForeignKey(patient => patient.DoctorId);*/
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
