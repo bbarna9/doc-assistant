@@ -55,23 +55,20 @@ namespace DocAssistantWebApi.Utils
             return Convert.ToHexString(idBytes)+"."+HashStringHex(salt, idBytes);
         }
 
-        public static bool VerifyAccessToken(Dictionary<long, string> accessTokens,string accessToken,out long resultDocId)
+        public static (bool, long) VerifyAccessToken(Dictionary<long, string> accessTokens,string accessToken)
         {
-            resultDocId = -1;
-            
+
             var splitted = accessToken.Split('.');
             
-            if (splitted.Length != 2) return false;
+            if (splitted.Length != 2) return (false,-1);
 
             var docIdBytes = Convert.FromHexString(splitted[0]);
             
             long docId = BitConverter.ToInt64(docIdBytes);
 
-            if (!accessTokens.ContainsKey(docId)) return false;
+            if (!accessTokens.ContainsKey(docId)) return (false,-1);
 
-            resultDocId = docId;
-            
-            return accessTokens[docId].Equals(splitted[1]);
+            return (accessTokens[docId].Equals(splitted[1]),docId);
         }
     }
 }
