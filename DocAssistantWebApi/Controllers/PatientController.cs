@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Authorization;
 namespace DocAssistantWebApi.Controllers
 {
     [ApiController]
-    [Route("api/patient")]
     public class PatientController : ControllerBase
     {
 
@@ -24,17 +23,43 @@ namespace DocAssistantWebApi.Controllers
             this._doctorRepository = doctorRepository;
             this._authService = authService;
         }
-        
-        [HttpGet]
-        public ActionResult<Patient> Get()
+
+        [Produces("application/json")]
+        [Route("api/patient/load")]
+        [HttpPost]
+        public async Task<ActionResult> LoadPatient([FromHeader(Name = "Authorization")] string token,[FromQuery(Name = "type")] string type, [FromQuery(Name = "id")] long? id)
         {
-            return Ok(
-                new Patient()
-            );
+            var result = await this._authService.Authorize(token);
+
+            if (!result.Item1)
+            {
+                return Unauthorized();
+            }
+            
+            switch (type)
+            {
+                case "single":
+                {
+                    var patient = await this._patientRepository.Where(patient => patient.Id == id);
+                    if (patient == null || patient.DoctorId != result.Item2)
+                    {
+                        return BadRequest(
+                            "Patient with id does not exist or the patient does not belong to this doctor account");
+                    }
+                    return Ok(patient);
+                }
+                case "all":
+                    var patients =
+                        await this._patientRepository.WhereMulti(patient => patient.DoctorId == result.Item2);
+                    return Ok(patients);
+                default:
+                    return BadRequest();
+            }
         }
 
-      //  [Authorize(Policy = "DoctorAuth")]
+        //  [Authorize(Policy = "DoctorAuth")]
         [Produces("application/json")]
+        [Route("api/patient")]
         [HttpPost]
         public async Task<ActionResult> AddPatient([FromHeader(Name = "Authorization")] string token,[FromBody] Patient patient)
         {
@@ -67,5 +92,6 @@ namespace DocAssistantWebApi.Controllers
             await this._patientRepository.Update(patient);
             
             return Ok();
+        }
     }
 }
