@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using DocAssistant_Common.Models;
 using DocAssistantWebApi.Database;
-using DocAssistantWebApi.Database.DbModels;
 using DocAssistantWebApi.Database.Repositories;
 using DocAssistantWebApi.Filters;
 using DocAssistantWebApi.Services.Auth;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -41,7 +42,7 @@ namespace DocAssistantWebApi
             });
 
             services.AddSingleton<IRepository<Doctor>, DoctorRepository>();
-            services.AddSingleton<IRepository<Database.DbModels.Patient>, PatientRepository>();
+            services.AddSingleton<IRepository<Patient>, PatientRepository>();
             services.AddSingleton<IAuthService, AuthService>();
             
            /* services.AddAuthorization(options =>
@@ -60,6 +61,8 @@ namespace DocAssistantWebApi
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "DocAssistantWebApi v1"));
             }
+
+           
 
             app.UseHttpsRedirection();
 
