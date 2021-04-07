@@ -8,5 +8,6 @@ namespace DocAssistant_Common.Models
         public string Password { get; set; }
         
         public List<Patient> Patients { get; set; } = new List<Patient>();
+        public List<Assistant> Assistants { get; set; } = new List<Assistant>();
     }
 }
