@@ -8,6 +8,7 @@ namespace DocAssistantWebApi.Database
         public static string ConnectionString { get; set; }
 
         public DbSet<Doctor> Doctors { get; set; }
+        public DbSet<Assistant> Assistants { get; set; }
         public DbSet<Patient> Patients { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
