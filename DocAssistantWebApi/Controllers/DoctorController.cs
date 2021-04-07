@@ -18,19 +18,21 @@ namespace DocAssistantWebApi.Controllers
     {
 
         private readonly IRepository<Doctor> _repository;
-        private readonly IAuthService _authService;
+        private readonly IRepository<Patient> _patientRepository;
+       // private readonly IAuthService _authService;
         
-        public StaffController(IRepository<Doctor> repository,IAuthService authService)
+        public StaffController(IRepository<Doctor> repository,IRepository<Patient> patientRepository/*,IAuthService authService*/)
         {
             this._repository = repository;
-            this._authService = authService;
+            this._patientRepository = patientRepository;
+          //  this._authService = authService;
         }
 
         
         [Route("/api/doc/register")]
         [Produces("application/json")]
         [HttpPost]
-        public async Task<ActionResult> RegisterDoctor([Microsoft.AspNetCore.Mvc.FromBody] Credentials credentials)
+        public async Task<ActionResult> Register([Microsoft.AspNetCore.Mvc.FromBody] Credentials credentials)
         {
 
             if (await this._repository.Where(doctor => doctor.Username.Equals(credentials.Username)) != null)
@@ -61,13 +63,47 @@ namespace DocAssistantWebApi.Controllers
             return Ok();
         }
 
-        [Authorize(Roles = nameof(Roles.Doctor))]
+        [Authorize(Policy = "DoctorRequirement")]
+        [Route("/api/assistant/register")]
+        [Produces("application/json")]
+        [HttpPost]
+        public async Task<ActionResult> RegisterAssistant([FromBody] Assistant data)
+        {
+            // Request made by doctors
+            
+            var errors = new Dictionary<string, string[]>();
+            
+            if (await this._repository.Where(assistant => assistant.Username.Equals(data.Username)) != null)
+            {
+                // throw error instead -> use error handling middleware
+                errors.Add("Username",new []{"Username is already in use"});
+                
+                return BadRequest(
+                    new BadRequestProblemDetails(errors)
+                    {
+                        Title = "Failed to create a new assistant account",
+                        StatusCode = 400
+                    }
+                );
+            }
+
+            var doctorId = (long) HttpContext.Items["Id"];
+            data.DoctorId = doctorId;
+
+            var doctor = await this._repository.Where(doctor => doctor.Id == doctorId);
+            doctor.Assistants.Add(data);
+            await this._repository.Save(doctor); 
+
+            return Ok();
+        }
+        
+        [Authorize(Policy = "DoctorRequirement")]
         [Route("/api/doc/update")]
         [Produces("application/json")]
         [HttpPatch]
         public async Task<ActionResult> UpdateDoctorData([FromHeader(Name = "Authorization")] string accessToken,[FromBody] Doctor data)
         {
-            var result = await this._authService.Authorize(accessToken);
+           /* var result = await this._authService.Authorize(accessToken);
             
             if (!result.Item1)
                 return Unauthorized();
@@ -76,7 +112,8 @@ namespace DocAssistantWebApi.Controllers
             
             await this._repository.Update(data);
 
-            return Ok();
+            */
+           return Ok();
         }
     }
 }
