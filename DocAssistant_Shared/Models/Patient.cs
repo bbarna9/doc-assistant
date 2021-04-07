@@ -35,6 +35,9 @@ namespace DocAssistant_Common.Models
         [Required]
         [ZIPValidation(minLength: 1, maxLength: 10)] 
         public string ZIP { get; set; }
+        
+        / validation
+        public string Complaint { get; set; }
 
         [Required] [SSNValidation] public string SSN { get; set; }
         
