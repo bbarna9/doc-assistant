@@ -40,25 +40,27 @@ namespace DocAssistantWebApi.Services.Auth.AuthHandler
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             if(!Request.Headers.ContainsKey("Authorization")) return AuthenticateResult.NoResult();
-            // TEST
+
             var claims = new List<Claim>();
+            long id;
 
             try
             {
                 var token = Request.Headers["Authorization"].FirstOrDefault();
 
-                if (token[0] == '$')
+                if (token[0] == '$') // if the token starts with $ => assistant
                 {
                     // Assistant
                     var (valid, assistantId, roles) = _assistantAuthService.VerifyAccessToken(token.Substring(1));
 
                     if (!valid) throw new Exception();
-
-                    // TEST
+                    
                     foreach (var role in roles)
                         claims.Add(new Claim(ClaimTypes.Role, role.GetDisplayName()));
 
-                    SetContextUserData(assistantId, roles);
+                    id = assistantId;
+
+                    // SetContextUserData(assistantId, roles);
                 }
                 else
                 {
@@ -66,12 +68,12 @@ namespace DocAssistantWebApi.Services.Auth.AuthHandler
                     var (valid, doctorId, roles) = _doctorAuthService.VerifyAccessToken(token);
 
                     if (!valid) throw new Exception();
-
-                    // TEST
+                    
                     foreach (var role in roles)
                         claims.Add(new Claim(ClaimTypes.Role, role.GetDisplayName()));
 
-                    SetContextUserData(doctorId, roles);
+                    id = doctorId;
+                    //SetContextUserData(doctorId, roles);
                 }
             }
             catch (Exception ex)
@@ -83,6 +85,8 @@ namespace DocAssistantWebApi.Services.Auth.AuthHandler
             var principal = new ClaimsPrincipal(new ClaimsIdentity(claims));
             var ticket = new AuthenticationTicket(principal, Scheme.Name);
 
+            Context.Items.Add("Id",id);
+            
             return AuthenticateResult.Success(ticket);
         }
     }
