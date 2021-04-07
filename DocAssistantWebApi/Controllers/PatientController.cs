@@ -13,35 +13,30 @@ namespace DocAssistantWebApi.Controllers
     public class PatientController : ControllerBase
     {
 
-       /* private readonly IRepository<Patient> _patientRepository;
+        private readonly IRepository<Patient> _patientRepository;
         private readonly IRepository<Doctor> _doctorRepository;
-       // private readonly IAuthService _authService;
-        
-        public PatientController(IRepository<Patient> repository,IRepository<Doctor> doctorRepository,IAuthService authService)
+
+        public PatientController(IRepository<Patient> repository,IRepository<Doctor> doctorRepository)
         {
             this._patientRepository = repository;
             this._doctorRepository = doctorRepository;
-           // this._authService = authService;
         }
 
+        [Authorize(Policy = "DoctorRequirement")]
         [Produces("application/json")]
         [Route("api/patient/load")]
         [HttpPost]
-        public async Task<ActionResult> LoadPatient([FromHeader(Name = "Authorization")] string token,[FromQuery(Name = "type")] string type, [FromQuery(Name = "id")] long? id)
+        public async Task<ActionResult> LoadPatient([FromQuery(Name = "type")] string type, [FromQuery(Name = "id")] long? id)
         {
-            var result = await this._authService.Authorize(token);
 
-            if (!result.Item1)
-            {
-                return Unauthorized();
-            }
+            long docId = (long) HttpContext.Items["Id"];
             
             switch (type)
             {
                 case "single":
                 {
                     var patient = await this._patientRepository.Where(patient => patient.Id == id);
-                    if (patient == null || patient.DoctorId != result.Item2)
+                    if (patient == null || patient.DoctorId != docId)
                     {
                         return BadRequest(
                             "Patient with id does not exist or the patient does not belong to this doctor account");
@@ -50,65 +45,48 @@ namespace DocAssistantWebApi.Controllers
                 }
                 case "all":
                     var patients =
-                        await this._patientRepository.WhereMulti(patient => patient.DoctorId == result.Item2);
+                        await this._patientRepository.WhereMulti(patient => patient.DoctorId == docId);
                     return Ok(patients);
                 default:
                     return BadRequest();
             }
         }
 
-        //  [Authorize(Policy = "DoctorAuth")]
+        [Authorize(Policy = "AssistantRequirement")]
         [Produces("application/json")]
         [Route("api/patient")]
         [HttpPost]
         public async Task<ActionResult> AddPatient([FromHeader(Name = "Authorization")] string token,[FromBody] Patient patient)
         {
-            var result = await this._authService.Authorize(token);
-
-            if (!result.Item1)
-            {
-                return Unauthorized();
-            }
-
-            var doctor = await this._doctorRepository.Where(doctor => doctor.Id == result.Item2);
+            long docId = (long)HttpContext.Items["Id"];
+            
+            var doctor = await this._doctorRepository.Where(doctor => doctor.Id == docId);
             doctor.Patients.Add(patient);
             await this._doctorRepository.Update(doctor);
 
             return Ok();
         }
 
+        [Authorize(Policy = "DoctorRequirement")]
         [Produces("application/json")]
         [Route("api/patient")]
         [HttpPatch]
-        public async Task<ActionResult> UpdateData([FromHeader(Name = "Authorization")] string token,[FromBody] Patient patient)
+        public async Task<ActionResult> UpdateData([FromBody] Patient patient)
         {
-            var result = await this._authService.Authorize(token);
-
-            if (!result.Item1)
-            {
-                return Unauthorized();
-            }
-
             await this._patientRepository.Update(patient);
             
             return Ok();
         }
 
+        [Authorize(Policy = "DoctorRequirement")]
         [Produces("application/json")]
         [Route("api/patient")]
         [HttpDelete]
-        public async Task<ActionResult> DeletePatient([FromHeader(Name = "Authorization")] string token,[FromQuery(Name = "id")] long id)
+        public async Task<ActionResult> DeletePatient([FromQuery(Name = "id")] long id)
         {
-            var result = await this._authService.Authorize(token);
-
-            if (!result.Item1)
-            {
-                return Unauthorized();
-            }
-
             await this._patientRepository.DeleteWhere(patient => patient.Id == id);
 
             return Ok();
-        }*/
+        }
     }
 }

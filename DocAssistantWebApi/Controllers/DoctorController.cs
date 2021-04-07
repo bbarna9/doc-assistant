@@ -92,7 +92,7 @@ namespace DocAssistantWebApi.Controllers
 
             var doctor = await this._repository.Where(doctor => doctor.Id == doctorId);
             doctor.Assistants.Add(data);
-            await this._repository.Save(doctor); 
+            await this._repository.Update(doctor); 
 
             return Ok();
         }
@@ -101,7 +101,7 @@ namespace DocAssistantWebApi.Controllers
         [Route("/api/doc/update")]
         [Produces("application/json")]
         [HttpPatch]
-        public async Task<ActionResult> UpdateDoctorData([FromHeader(Name = "Authorization")] string accessToken,[FromBody] Doctor data)
+        public async Task<ActionResult> UpdateDoctorData([FromBody] Doctor data)
         {
            /* var result = await this._authService.Authorize(accessToken);
             
