@@ -15,6 +15,7 @@ namespace DocAssistantWebApi.Database.Repositories
         Task UpdateChangedProperties(T entity);
         Task Update(T entity);
         Task Save(T entity);
+        Task DeleteWhere(Expression<Func<T, bool>> expression);
         Task<T> Where(Expression<Func<T, bool>> expression);
         Task<IEnumerable<T>> WhereMulti(Expression<Func<T, bool>> expression);
         

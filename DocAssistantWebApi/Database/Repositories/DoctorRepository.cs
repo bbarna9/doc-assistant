@@ -66,5 +66,10 @@ namespace DocAssistantWebApi.Database.Repositories
 
             return await ctx.Doctors.Where(expression).ToListAsync();
         }
+
+        public async Task DeleteWhere(Expression<Func<Doctor, bool>> expression)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
