@@ -13,15 +13,15 @@ namespace DocAssistantWebApi.Controllers
     public class PatientController : ControllerBase
     {
 
-        private readonly IRepository<Patient> _patientRepository;
+       /* private readonly IRepository<Patient> _patientRepository;
         private readonly IRepository<Doctor> _doctorRepository;
-        private readonly IAuthService _authService;
+       // private readonly IAuthService _authService;
         
         public PatientController(IRepository<Patient> repository,IRepository<Doctor> doctorRepository,IAuthService authService)
         {
             this._patientRepository = repository;
             this._doctorRepository = doctorRepository;
-            this._authService = authService;
+           // this._authService = authService;
         }
 
         [Produces("application/json")]
@@ -93,5 +93,22 @@ namespace DocAssistantWebApi.Controllers
             
             return Ok();
         }
+
+        [Produces("application/json")]
+        [Route("api/patient")]
+        [HttpDelete]
+        public async Task<ActionResult> DeletePatient([FromHeader(Name = "Authorization")] string token,[FromQuery(Name = "id")] long id)
+        {
+            var result = await this._authService.Authorize(token);
+
+            if (!result.Item1)
+            {
+                return Unauthorized();
+            }
+
+            await this._patientRepository.DeleteWhere(patient => patient.Id == id);
+
+            return Ok();
+        }*/
     }
 }
