@@ -2,14 +2,18 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using DocAssistantWebApi.Filters;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace DocAssistantWebApi.Utils
 {
     public abstract class SecurityUtils
     {
         private const int SaltSize = 10;
-        
-        private static byte[] GenerateRandomSalt(int size = SaltSize)
+
+        public static byte[] GenerateRandomSalt(int size = SaltSize)
         {
             byte [] salt = new byte[size];
             
@@ -44,31 +48,6 @@ namespace DocAssistantWebApi.Utils
             var plainHashed = HashStringHex(Encoding.Default.GetBytes(plain),salt);
 
             return storedPassword.Equals(plainHashed);
-        }
-
-        public static string GenerateAccessToken(long doctorId)
-        {
-            var salt = GenerateRandomSalt(32);
-
-            var idBytes = BitConverter.GetBytes(doctorId);
-
-            return Convert.ToHexString(idBytes)+"."+HashStringHex(salt, idBytes);
-        }
-
-        public static (bool, long) VerifyAccessToken(Dictionary<long, string> accessTokens,string accessToken)
-        {
-
-            var splitted = accessToken.Split('.');
-            
-            if (splitted.Length != 2) return (false,-1);
-
-            var docIdBytes = Convert.FromHexString(splitted[0]);
-            
-            long docId = BitConverter.ToInt64(docIdBytes);
-
-            if (!accessTokens.ContainsKey(docId)) return (false,-1);
-
-            return (accessTokens[docId].Equals(splitted[1]),docId);
         }
     }
 }
