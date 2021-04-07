@@ -5,29 +5,32 @@ using Microsoft.AspNetCore.Mvc;
 using DocAssistant_Common.Models;
 using DocAssistantWebApi.Database.Repositories;
 using DocAssistantWebApi.Errors;
+using DocAssistantWebApi.Filters;
 using DocAssistantWebApi.Services.Auth;
 using DocAssistantWebApi.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json.Linq;
 
 namespace DocAssistantWebApi.Controllers
 {
     [ApiController]
-    public class DoctorController : ControllerBase
+    public class StaffController : ControllerBase
     {
 
         private readonly IRepository<Doctor> _repository;
         private readonly IAuthService _authService;
         
-        public DoctorController(IRepository<Doctor> repository,IAuthService authService)
+        public StaffController(IRepository<Doctor> repository,IAuthService authService)
         {
             this._repository = repository;
             this._authService = authService;
         }
+
         
         [Route("/api/doc/register")]
         [Produces("application/json")]
         [HttpPost]
-        public async Task<ActionResult> Register([Microsoft.AspNetCore.Mvc.FromBody] Credentials credentials)
+        public async Task<ActionResult> RegisterDoctor([Microsoft.AspNetCore.Mvc.FromBody] Credentials credentials)
         {
 
             if (await this._repository.Where(doctor => doctor.Username.Equals(credentials.Username)) != null)
@@ -58,10 +61,11 @@ namespace DocAssistantWebApi.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = nameof(Roles.Doctor))]
         [Route("/api/doc/update")]
         [Produces("application/json")]
         [HttpPatch]
-        public async Task<ActionResult> UpdateData([FromHeader(Name = "Authorization")] string accessToken,[FromBody] Doctor data)
+        public async Task<ActionResult> UpdateDoctorData([FromHeader(Name = "Authorization")] string accessToken,[FromBody] Doctor data)
         {
             var result = await this._authService.Authorize(accessToken);
             
