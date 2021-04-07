@@ -16,14 +16,14 @@ using Newtonsoft.Json.Serialization;
 
 namespace DocAssistantWebApi.Services.Auth
 {
-    public class AuthService : IAuthService<Doctor>
+    public class DoctorAuthService : IAuthService<Doctor>
     {
         private readonly Dictionary<long, byte []> _accessTokens;
        // private readonly Dictionary<long, byte[]> _assistantAccessTokens;
             
         private readonly IRepository<Doctor> _doctorRepository;
         
-        public AuthService(IRepository<Doctor> doctorRepository)
+        public DoctorAuthService(IRepository<Doctor> doctorRepository)
         {
             this._accessTokens = new Dictionary<long, byte[]>();
           //  this._assistantAccessTokens = new Dictionary<long, byte[]>();
@@ -68,17 +68,19 @@ namespace DocAssistantWebApi.Services.Auth
 
         public async Task<(bool, long)> Authorize(/*HttpContext context, */string accessToken)
         {
-            return SecurityUtils.VerifyAccessToken(_doctorAccessTokens, accessToken);
+            throw new NotImplementedException();
+           // return SecurityUtils.VerifyAccessToken(_doctorAccessTokens, accessToken);
         }
         
         public async Task<bool> Logout(string accessToken)
         {
-            var result = SecurityUtils.VerifyAccessToken(_accessTokens, accessToken);
+            throw new NotImplementedException();
+            /*var result = SecurityUtils.VerifyAccessToken(_accessTokens, accessToken);
             if(!result.Item1) return false;
 
             this._accessTokens.Remove(result.Item2);
 
-            return true;
+            return true;*/
         }
 
         public (bool, long, IEnumerable<Roles> ) VerifyAccessToken(string token)
@@ -92,7 +94,7 @@ namespace DocAssistantWebApi.Services.Auth
 
             var jsonObject = JObject.Parse(jsonString);
 
-            var id = (long) jsonObject["id"];
+            var id = (long) jsonObject["userId"];
 
             if (!_accessTokens.ContainsKey(id)) return (false,-1,null);
 
@@ -106,7 +108,7 @@ namespace DocAssistantWebApi.Services.Auth
             var constructedToken = SecurityUtils.HashStringHex(Encoding.Default.GetBytes(JsonConvert.SerializeObject(jsonObject,settings)), salt);
             if (constructedToken != splitted[1]) return (false, -1, null);
 
-                var rolesString = (string[]) jsonObject["roles"];
+            var rolesString = jsonObject["roles"].ToObject<string []>();
 
             if (rolesString == null) return (false,-1,null);
             
