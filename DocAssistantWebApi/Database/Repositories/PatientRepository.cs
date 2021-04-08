@@ -77,13 +77,18 @@ namespace DocAssistantWebApi.Database.Repositories
                 .ToListAsync();
         }
 
-        public async Task DeleteWhere(Expression<Func<Patient, bool>> expression)
+        public async Task<int> DeleteWhere(Expression<Func<Patient, bool>> expression)
         {
             await using var ctx = new SQLiteDatabaseContext();
 
             var patient = await ctx.Patients.FirstOrDefaultAsync(expression);
+
+            if (patient == default) return 0;
+            
             ctx.Patients.Remove(patient);
             await ctx.SaveChangesAsync();
+
+            return 1;
         }
     }
 }
