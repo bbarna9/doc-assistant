@@ -26,23 +26,13 @@ namespace DocAssistantWebApi.Services.Auth.AuthHandler
             this._assistantAuthService = assistantAuthService;
         }
 
-        private void SetContextUserData(long id, IEnumerable<Roles> roles)
-        {
-            var claims = new List<Claim>();
-
-            foreach (var role in roles)
-                claims.Add(new Claim(ClaimTypes.Role,role.GetDisplayName()));
-            
-            Context.User.AddIdentity(new ClaimsIdentity(claims));
-            Context.Items.Add("Id",id);
-        }
-
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             if(!Request.Headers.ContainsKey("Authorization")) return AuthenticateResult.NoResult();
 
             var claims = new List<Claim>();
             long id;
+            Roles userRole = default;
 
             try
             {
@@ -59,8 +49,7 @@ namespace DocAssistantWebApi.Services.Auth.AuthHandler
                         claims.Add(new Claim(ClaimTypes.Role, role.GetDisplayName()));
 
                     id = assistantId;
-
-                    // SetContextUserData(assistantId, roles);
+                    userRole = Roles.Assistant;
                 }
                 else
                 {
@@ -73,7 +62,7 @@ namespace DocAssistantWebApi.Services.Auth.AuthHandler
                         claims.Add(new Claim(ClaimTypes.Role, role.GetDisplayName()));
 
                     id = doctorId;
-                    //SetContextUserData(doctorId, roles);
+                    userRole = Roles.Doctor;
                 }
             }
             catch (Exception ex)
