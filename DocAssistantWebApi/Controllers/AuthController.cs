@@ -54,12 +54,31 @@ namespace DocAssistantWebApi.Controllers
             }
         }
 
-        [Microsoft.AspNetCore.Mvc.Route("/api/logout")]
+        [Authorize(Policy = "AssistantRequirement")]
+        [Route("/api/logout")]
         [Produces("application/json")]
-        [Microsoft.AspNetCore.Mvc.HttpPost]
-        public async Task<ActionResult> Logout([FromHeader(Name = "Authorization")] string accessToken)
+        [HttpPost]
+        public async Task<ActionResult> Logout([FromQuery(Name = "type")] string type)
         {
-            //if (!await this._authService.Logout(accessToken)) return Unauthorized();
+            long userId = (long) HttpContext.Items["Id"];
+            
+            switch (type)
+            {
+                case "doctor":
+                    await this._doctorAuthService.Logout(userId);
+                    break;
+                case "assistant":
+                    await this._assistantAuthService.Logout(userId);
+                    break;
+                default:
+                    throw new GenericRequestException
+                    {
+                        Title = "Failed to log out",
+                        Error =
+                            "Invalid account type",
+                        StatusCode = 400
+                    };
+            }
             
             return Ok();
         }
