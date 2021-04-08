@@ -1,61 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using DocAssistant_Common.Models;
 using DocAssistantWebApi.Database.Repositories;
 using DocAssistantWebApi.Errors;
-using DocAssistantWebApi.Filters;
-using DocAssistantWebApi.Services.Auth;
 using DocAssistantWebApi.Utils;
 using Microsoft.AspNetCore.Authorization;
-using Newtonsoft.Json.Linq;
 
 namespace DocAssistantWebApi.Controllers
 {
     [ApiController]
-    public class StaffController : ControllerBase
+    public class DoctorController : ControllerBase
     {
 
         private readonly IRepository<Doctor> _repository;
         private readonly IRepository<Patient> _patientRepository;
-       // private readonly IAuthService _authService;
-        
-        public StaffController(IRepository<Doctor> repository,IRepository<Patient> patientRepository/*,IAuthService authService*/)
+
+        public DoctorController(IRepository<Doctor> repository,IRepository<Patient> patientRepository)
         {
             this._repository = repository;
             this._patientRepository = patientRepository;
-          //  this._authService = authService;
         }
 
         
-        [Route("/api/doc/register")]
+        [Route("/api/doc/")]
         [Produces("application/json")]
         [HttpPost]
-        public async Task<ActionResult> Register([Microsoft.AspNetCore.Mvc.FromBody] Credentials credentials)
+        public async Task<ActionResult> Register([FromBody] Credentials credentials)
         {
 
             if (await this._repository.Where(doctor => doctor.Username.Equals(credentials.Username)) != null)
             {
-                var errors = new Dictionary<string, string[]>()
+                throw new GenericRequestException
                 {
-                    {"Username",new []{"Username is already in use"}}
+                    Title = "Failed to create a new doctor account",
+                    Error =
+                        "Username is already in use",
+                    StatusCode = 400
                 };
-                
-                return BadRequest(
-                    new BadRequestProblemDetails(errors)
-                    {
-                        Title = "Failed to create a new doctor account",
-                        StatusCode = 400
-                    }
-                );
             }
 
             var doctor = new Doctor
             {
                 Username = credentials.Username,
                 Password = SecurityUtils.CreatePasswordHash(credentials.Password),
-                
             };
 
             await _repository.Save(doctor);
