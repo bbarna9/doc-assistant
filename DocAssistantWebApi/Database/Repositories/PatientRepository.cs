@@ -28,19 +28,22 @@ namespace DocAssistantWebApi.Database.Repositories
             throw new NotImplementedException();
         }
 
-        public async Task Update(Patient entity)
+        public async Task<bool> Update(Patient entity)
         {
             await using var ctx = new SQLiteDatabaseContext();
             
-            var patientToUpdate = await ctx.Patients.FirstOrDefaultAsync();
-            if (patientToUpdate != null)
-            {
-                patientToUpdate.FirstName = entity.FirstName;
-                patientToUpdate.LastName = entity.LastName;
+            var patientToUpdate = await ctx.Patients.FirstOrDefaultAsync(patient => patient.Id == entity.Id);
+            if (patientToUpdate == null) return false;
+            
+            var updatedProperties = IRepository<Patient>.GetUpdatedProperties(patientToUpdate,entity);
 
-                    
-                await ctx.SaveChangesAsync();
+            foreach (var property in updatedProperties)
+            {
+                patientToUpdate.GetType().GetProperty(property.Item1, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase | BindingFlags.NonPublic)
+                    ?.SetValue(patientToUpdate,property.Item2);
             }
+
+            return await ctx.SaveChangesAsync() > 0;
         }
         
         public async Task Save(Patient entity)
