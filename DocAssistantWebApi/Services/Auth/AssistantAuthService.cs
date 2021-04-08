@@ -6,43 +6,21 @@ using DocAssistantWebApi.Filters;
 
 namespace DocAssistantWebApi.Services.Auth
 {
-    public class AssistantAuthService : IAuthService<Assistant>
+    public class AssistantAuthService : AuthServiceBase<Assistant>
     {
-        
-        private readonly Dictionary<long, byte []> _accessTokens;
+        public AssistantAuthService(IRepository<Assistant> assistantRepository) : base(assistantRepository) {}
 
-        private readonly IRepository<Assistant> _assistantRepository;
-        
-        public AssistantAuthService(IRepository<Assistant> assistantRepository)
+        public override async Task<Assistant> Auth(string username, string password)
         {
-            this._accessTokens = new Dictionary<long, byte[]>();
+            Assistant assistant = await this.Repository.Where(
+                assistant => assistant.Username.Equals(username));
 
-            this._assistantRepository = assistantRepository;
-        }
-        
-        public Task<Assistant> Auth(string username, string password)
-        {
-            throw new System.NotImplementedException();
+            return await base.Auth(assistant, password);
         }
 
-        public Task<string> GenerateAccessToken(Assistant doctor)
+        public override async Task<string> GenerateAccessToken(Assistant assistant)
         {
-            throw new System.NotImplementedException();
-        }
-
-        public (bool, long, IEnumerable<Roles>) VerifyAccessToken(string token)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<(bool, long)> Authorize(string accessToken)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<bool> Logout(string accessToken)
-        {
-            throw new System.NotImplementedException();
+            return await base.GenerateAccessToken(assistant);
         }
     }
 }
