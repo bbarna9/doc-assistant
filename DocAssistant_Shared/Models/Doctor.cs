@@ -1,13 +1,11 @@
 ﻿using System.Collections.Generic;
+using DocAssistant_Common.Attributes;
 
 namespace DocAssistant_Common.Models
 {
-    public class Doctor : Person
+    public class Doctor : Staff
     {
-        public string Username { get; set; }
-        public string Password { get; set; }
-        
-        public List<Patient> Patients { get; set; } = new List<Patient>();
-        public List<Assistant> Assistants { get; set; } = new List<Assistant>();
+        [Fixed] public List<Patient> Patients { get; set; } = new List<Patient>();
+        [Fixed] public List<Assistant> Assistants { get; set; } = new List<Assistant>();
     }
 }
