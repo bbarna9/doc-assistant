@@ -27,9 +27,30 @@ namespace DocAssistantWebApi.Database.Repositories
             foreach (var property in properties)
             {
                 var value = property.GetValue(entity);
-                if (value != default && property.GetCustomAttributes().FirstOrDefault(attribute => attribute is KeyAttribute) == null)
+                if (value != default && property.GetCustomAttributes().FirstOrDefault(attribute => attribute is FixedAttribute) == null)
                 {
                     updatedProperties.Add((property.Name,value));
+                }
+            }
+
+            return updatedProperties;
+        }
+        public static IEnumerable<(string, object)> GetUpdatedProperties(T original,T updated)
+        {
+            // Get modified properties that does not have FixedAttribute (not modifiable)
+            
+            var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.IgnoreCase |
+                                                     BindingFlags.Instance | BindingFlags.NonPublic);
+            var updatedProperties = new List<(string, object)>();
+
+            foreach (var property in properties)
+            {
+                var originalValue = property.GetValue(original);
+                var updateValue = property.GetValue(updated);
+
+                if (updateValue != default && originalValue != updateValue && property.GetCustomAttributes().FirstOrDefault(attribute => attribute is FixedAttribute) == null)
+                {
+                    updatedProperties.Add((property.Name,updateValue));
                 }
             }
 
