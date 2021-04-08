@@ -23,7 +23,7 @@ namespace DocAssistantWebApi.Database.Repositories
             return patient;
         }
 
-        public Task UpdateChangedProperties(Patient entity)
+        public Task<bool> UpdateChangedProperties(Patient entity)
         {
             throw new NotImplementedException();
         }
@@ -50,6 +50,8 @@ namespace DocAssistantWebApi.Database.Repositories
         {
             await using var ctx = new SQLiteDatabaseContext();
 
+            entity.ArriveTime = DateTime.Now;
+            
             await ctx.AddAsync(entity);
             await ctx.SaveChangesAsync();
         }
