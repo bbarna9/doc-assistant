@@ -86,6 +86,7 @@ namespace DocAssistantWebApi.Services.Auth.AuthHandler
             var ticket = new AuthenticationTicket(principal, Scheme.Name);
 
             Context.Items.Add("Id",id);
+            Context.Items.Add("AccountType",userRole);
             
             return AuthenticateResult.Success(ticket);
         }
