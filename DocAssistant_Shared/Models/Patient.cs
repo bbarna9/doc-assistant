@@ -8,9 +8,9 @@ namespace DocAssistant_Common.Models
 {
     public sealed class Patient
     {
-        public long Id { get; set; }
+        [Fixed] public long Id { get; set; }
         
-        [ForeignKey("DoctorId")] public long DoctorId { get; set; }
+        [Fixed] [ForeignKey("DoctorId")] public long DoctorId { get; set; }
 
         [Required] 
         [CommonValidation("^[^~!@#$%^&*\\(\\)-=_+\\{\\}\\[\\];\\\":<>\\/?,.|\\\\]{1,50}$")] 
@@ -36,12 +36,15 @@ namespace DocAssistant_Common.Models
         [ZIPValidation(minLength: 1, maxLength: 10)] 
         public string ZIP { get; set; }
         
-        / validation
+        [Required]
+        [CommonValidation("^.{1,500}$")]
         public string Complaint { get; set; }
 
-        [Required] [SSNValidation] public string SSN { get; set; }
+        [Fixed] [Required] [SSNValidation] public string SSN { get; set; }
         
         [Required] public DateTime DateOfBirth { get; set; }
+        
+        public DateTime ArriveTime { get; set; }
 
         public Patient()
         {
