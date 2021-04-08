@@ -6,16 +6,17 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Linq;
+using DocAssistant_Common.Attributes;
 
 namespace DocAssistantWebApi.Database.Repositories
 {
     public interface IRepository<T> where T : class
     {
         Task<T> Get(T entity);
-        Task UpdateChangedProperties(T entity);
-        Task Update(T entity);
+        Task<bool> UpdateChangedProperties(T entity);
+        Task<bool> Update(T entity);
         Task Save(T entity);
-        Task DeleteWhere(Expression<Func<T, bool>> expression);
+        Task<int> DeleteWhere(Expression<Func<T, bool>> expression);
         Task<T> Where(Expression<Func<T, bool>> expression);
         Task<IEnumerable<T>> WhereMulti(Expression<Func<T, bool>> expression);
         
