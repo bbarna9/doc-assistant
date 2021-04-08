@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using DocAssistantWebApi.Filters;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -10,7 +11,23 @@ namespace DocAssistantWebApi.Utils.Factories
 {
     public abstract class TokenFactory
     {
+        private static readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings
+            {NullValueHandling = NullValueHandling.Ignore};
 
+        private static readonly TimeSpan TokenLife = new TimeSpan(7,0,0,0);
+        
+        public class AccessTokenPayload
+        {
+            [JsonProperty("userId")]
+            public long UserId { get; set; }
+            [JsonProperty("roles")]
+            public string[] Roles { get; set; }
+            [JsonProperty("iat")] 
+            public DateTime Issued { get; set; }
+            [JsonProperty("exp")]
+            public DateTime Expires { get; set; }
+        }
+        
         public static (byte[],string) CreateAccessToken(Roles tokenType, long userId)
         {
             switch (tokenType)
@@ -24,37 +41,33 @@ namespace DocAssistantWebApi.Utils.Factories
             }
         }
 
-        private static (byte[], string) CreateToken(long userId,string[] roles, string prefix = "")
+        private static AccessTokenPayload GetAccessTokenPayload(long userId,Roles [] roles)
         {
-            var salt = SecurityUtils.GenerateRandomSalt(32);
+            var time = DateTime.Now;
             
-            object info = new
+            return new AccessTokenPayload()
             {
                 UserId = userId,
-                Roles = roles
+                Roles = roles.GetFormattedRoles().ToArray(),
+                Issued = time,
+                Expires = time.Add(TokenLife)
             };
-            // Add timestamp
+        }
+        
+        private static (byte[], string) CreateToken(AccessTokenPayload payload, string prefix = "")
+        {
+            var salt = SecurityUtils.GenerateRandomSalt(32);
 
-            var settings = new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
-            };
-
-            var infoBytes = Encoding.Default.GetBytes(JsonConvert.SerializeObject(info, settings));
+            var infoBytes = Encoding.Default.GetBytes(JsonConvert.SerializeObject(payload,_serializerSettings));
 
             var infoStringSignature = SecurityUtils.HashStringHex(infoBytes, salt);
             
             return (salt, prefix + Convert.ToHexString(infoBytes) + "." + infoStringSignature);
         }
 
-        private static (byte[], string) CreateDoctorAccessToken(long userId) => CreateToken(userId, new Roles[]
-        {
-            Roles.Assistant,
-            Roles.Doctor
-        }.GetFormattedRoles().ToArray());
-        private static (byte[],string) CreateAssistantAccessToken(long userId) => CreateToken(userId, new Roles[]
-        {
-            Roles.Assistant
-        }.GetFormattedRoles().ToArray(),"$");
+        private static (byte[], string) CreateDoctorAccessToken(long userId) => CreateToken(GetAccessTokenPayload(userId,
+            new Roles[]{Roles.Assistant, Roles.Doctor}));
+        private static (byte[],string) CreateAssistantAccessToken(long userId) => CreateToken(GetAccessTokenPayload(userId,
+            new Roles[]{Roles.Assistant}),"$");
     }
 }
