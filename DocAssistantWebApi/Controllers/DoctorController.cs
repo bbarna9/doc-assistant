@@ -64,56 +64,25 @@ namespace DocAssistantWebApi.Controllers
         }
 
         [Authorize(Policy = "DoctorRequirement")]
-        [Route("/api/assistant/register")]
-        [Produces("application/json")]
-        [HttpPost]
-        public async Task<ActionResult> RegisterAssistant([FromBody] Assistant data)
-        {
-            // Request made by doctors
-            
-            var errors = new Dictionary<string, string[]>();
-            
-            if (await this._repository.Where(assistant => assistant.Username.Equals(data.Username)) != null)
-            {
-                // throw error instead -> use error handling middleware
-                errors.Add("Username",new []{"Username is already in use"});
-                
-                return BadRequest(
-                    new BadRequestProblemDetails(errors)
-                    {
-                        Title = "Failed to create a new assistant account",
-                        StatusCode = 400
-                    }
-                );
-            }
-
-            var doctorId = (long) HttpContext.Items["Id"];
-            data.DoctorId = doctorId;
-
-            var doctor = await this._repository.Where(doctor => doctor.Id == doctorId);
-            doctor.Assistants.Add(data);
-            await this._repository.Update(doctor); 
-
-            return Ok();
-        }
-        
-        [Authorize(Policy = "DoctorRequirement")]
-        [Route("/api/doc/update")]
+        [Route("/api/doc/")]
         [Produces("application/json")]
         [HttpPatch]
         public async Task<ActionResult> UpdateDoctorData([FromBody] Doctor data)
         {
-           /* var result = await this._authService.Authorize(accessToken);
-            
-            if (!result.Item1)
-                return Unauthorized();
 
-            data.Id = result.Item2;
-            
-            await this._repository.Update(data);
+            data.Id = (long) HttpContext.Items["Id"];
 
-            */
-           return Ok();
+            if (!await this._repository.UpdateChangedProperties(data))
+            {
+                throw new GenericRequestException
+                {
+                    Title = "Failed to update account data",
+                    Error = "No changes were made",
+                    StatusCode = 400
+                };
+            }
+            
+            return Ok();
         }
     }
 }
