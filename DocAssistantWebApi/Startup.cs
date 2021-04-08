@@ -103,8 +103,28 @@ namespace DocAssistantWebApi
                 var exception = context.Features
                     .Get<IExceptionHandlerPathFeature>()
                     .Error;
-                var response = new { error = exception.Message };
-                await context.Response.WriteAsJsonAsync(response);
+
+                if (!context.Response.HasStarted)
+                {
+                    if (exception is GenericRequestException ex)
+                    {
+                        var response = new
+                        {
+                            title = ex.Title,
+                            error = ex.Error,
+                            status = ex.StatusCode
+                        };
+                    
+                        context.Response.StatusCode = ex.StatusCode;
+                    
+                        await context.Response.WriteAsJsonAsync(response);
+                    }
+                    else
+                    {
+                        var response = new { error = exception.Message, status = 500 };
+                        await context.Response.WriteAsJsonAsync(response);
+                    }
+                }
             }));
 
             app.UseHttpsRedirection();
