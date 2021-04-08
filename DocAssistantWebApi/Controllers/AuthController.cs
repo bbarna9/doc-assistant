@@ -1,16 +1,13 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Web.Mvc;
-using DocAssistant_Common.Models;
-using DocAssistantWebApi.Services.Auth;
-using Microsoft.AspNetCore.Http;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using ActionResult = Microsoft.AspNetCore.Mvc.ActionResult;
-using ControllerBase = Microsoft.AspNetCore.Mvc.ControllerBase;
+using DocAssistant_Common.Models;
+using DocAssistantWebApi.Errors;
+using DocAssistantWebApi.Services.Auth;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 
 namespace DocAssistantWebApi.Controllers
 {
-    [RoutePrefix("api")]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -23,12 +20,12 @@ namespace DocAssistantWebApi.Controllers
             this._assistantAuthService = assistantAuthService;
         }
         
-        [Microsoft.AspNetCore.Mvc.Route("/api/auth")]
+        [Route("/api/auth")]
         [Produces("application/json")]
-        [Microsoft.AspNetCore.Mvc.HttpPost]
+        [HttpPost]
         public async Task<ActionResult> Auth([FromQuery(Name = "type")] string type,[FromBody] Credentials credentials)
         {
-            string accessToken = null;
+            object response = null;
             switch (type)
             {
                 case "doctor":
@@ -36,21 +33,31 @@ namespace DocAssistantWebApi.Controllers
                     var doc = await _doctorAuthService.Auth(credentials.Username, credentials.Password);
                     if (doc == null) return Unauthorized();
                     
-                    accessToken = await this._doctorAuthService.GenerateAccessToken(doc);
-                    return Ok(accessToken);
+                    response = new
+                    {
+                        accessToken = await this._doctorAuthService.GenerateAccessToken(doc)
+                    };
                     
-                    break;
+                    return Ok(response);
                 case "assistant":
                     
-                    var assistant = await _doctorAuthService.Auth(credentials.Username, credentials.Password);
+                    var assistant = await _assistantAuthService.Auth(credentials.Username, credentials.Password);
                     if (assistant == null) return Unauthorized();
                     
-                    accessToken = await this._doctorAuthService.GenerateAccessToken(assistant);
-                    return Ok(accessToken);
-                    
-                    break;
+                    response = new
+                    {
+                        accessToken = await this._assistantAuthService.GenerateAccessToken(assistant)
+                    };
+
+                    return Ok(response);
                 default:
-                    return BadRequest();
+                    throw new GenericRequestException
+                    {
+                        Title = "Failed to auth",
+                        Error =
+                            "Invalid account type",
+                        StatusCode = 400
+                    };
             }
         }
 
