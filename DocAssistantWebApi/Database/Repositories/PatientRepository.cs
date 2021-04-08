@@ -18,7 +18,7 @@ namespace DocAssistantWebApi.Database.Repositories
             
             await using var ctx = new SQLiteDatabaseContext();
             
-            patient = (Patient) await ctx.Patients.FindAsync(entity);
+            patient = await ctx.Patients.FindAsync(entity);
 
             return patient;
         }
