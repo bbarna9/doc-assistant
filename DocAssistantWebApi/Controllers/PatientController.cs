@@ -136,7 +136,7 @@ namespace DocAssistantWebApi.Controllers
                     StatusCode = 400
                 };
 
-            if(!await this._patientRepository.Update(patient)) 
+            if(!await this._patientRepository.UpdateChangedProperties(patient)) 
                 throw new GenericRequestException
                 {
                     Title = "Failed to update patient data",
