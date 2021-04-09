@@ -1,6 +1,7 @@
 using System;
 using DocAssistant_Common.Models;
 using DocAssistantWebApi.Database;
+using DocAssistantWebApi.Database.Factories;
 using DocAssistantWebApi.Database.Repositories;
 using DocAssistantWebApi.Errors;
 using DocAssistantWebApi.Filters;
@@ -35,6 +36,8 @@ namespace DocAssistantWebApi
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "DocAssistantWebApi", Version = "v1"});
             });
+
+            services.AddSingleton<IDatabaseFactory, SQLiteDatabaseFactory>();
 
             services.AddSingleton<IRepository<Doctor>, DoctorRepository>();
             services.AddSingleton<IRepository<Patient>, PatientRepository>();

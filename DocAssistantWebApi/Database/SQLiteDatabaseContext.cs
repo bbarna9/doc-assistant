@@ -1,9 +1,11 @@
-﻿using DocAssistant_Common.Models;
+﻿using System.Linq;
+using System.Reflection;
+using DocAssistant_Common.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DocAssistantWebApi.Database
 {
-    public sealed class SQLiteDatabaseContext : DbContext
+    public sealed class SQLiteDatabaseContext : DbContext, IDatabaseContext
     {
         public static string ConnectionString { get; set; }
 
@@ -17,14 +19,23 @@ namespace DocAssistantWebApi.Database
             modelBuilder.Entity<Patient>()
                 .HasIndex(patient => patient.SSN)
                 .IsUnique();
-            
-           /* modelBuilder.Entity<Patient>()
-                .HasOne(patient => patient.Doctor)
-                .WithMany(doctor => doctor.Patients)
-                .HasForeignKey(patient => patient.DoctorId);*/
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseSqlite(ConnectionString); 
+            => options.UseSqlite(ConnectionString);
+
+        public DbSet<T> GetSet<T>() where T : class
+        {
+            return (DbSet<T>) this.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .FirstOrDefault(property =>property.PropertyType == typeof(DbSet<T>))?.GetValue(this);
+        }
+
+        public DbSet<T> GetSet<T>(string tableName) where T : class
+        {
+            return (DbSet<T>) this.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .FirstOrDefault(property =>property.PropertyType == typeof(DbSet<T>) && property.Name == tableName)?.GetValue(this);
+        }
+
+        public DbContext GetContext() => this;
     }
 }
