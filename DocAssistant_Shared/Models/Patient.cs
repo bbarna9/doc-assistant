@@ -6,18 +6,16 @@ using DocAssistant_Common.Attributes;
 
 namespace DocAssistant_Common.Models
 {
-    public sealed class Patient
+    public sealed class Patient : Person
     {
-        [Fixed] public long Id { get; set; }
-        
         [Fixed] [ForeignKey("DoctorId")] public long DoctorId { get; set; }
 
         [Required] 
         [CommonValidation("^[^~!@#$%^&*\\(\\)-=_+\\{\\}\\[\\];\\\":<>\\/?,.|\\\\]{1,50}$")] 
-        public string FirstName { get; set; }
+        public override string FirstName { get; set; }
         [Required] 
         [CommonValidation("^[^~!@#$%^&*\\(\\)-=_+\\{\\}\\[\\];\\\":<>\\/?,.|\\\\]{1,50}$")] 
-        public string LastName { get; set; }
+        public override string LastName { get; set; }
       //  [Required] [AddressValidation] public Address Address { get; set; }
       
         [Required]
