@@ -12,13 +12,12 @@ namespace DocAssistantWebApi.Controllers
     [ApiController]
     public class AssistantController : ControllerBase
     {
-        private readonly IRepository<Assistant> _assistantRepository;
-        private readonly IRepository<Doctor> _doctorRepository;
 
-        public AssistantController(IRepository<Assistant> assistantRepository,IRepository<Doctor> doctorRepository)
+       private readonly IRepository<Assistant> _assistantRepository;
+       
+       public AssistantController(IRepository<Assistant> assistantRepository)
         {
             this._assistantRepository = assistantRepository;
-            this._doctorRepository = doctorRepository;
         }
         
         [Authorize(Policy = "DoctorRequirement")]
@@ -47,16 +46,8 @@ namespace DocAssistantWebApi.Controllers
                 DoctorId = doctorId
             };
             
-            var doctor = await this._doctorRepository.Where(doctor => doctor.Id == doctorId);
-            doctor.Assistants.Add(assistant);
             
-            if(!await this._doctorRepository.Update(doctor))
-                throw new GenericRequestException
-                {
-                    Title = "Failed to create a new assistant account",
-                    Error = "Save failed",
-                    StatusCode = 400
-                };
+           await this._assistantRepository.Save(assistant);
 
             return Ok();
         }
