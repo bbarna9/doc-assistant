@@ -16,14 +16,14 @@ namespace DocAssistantWebApi.Database.Repositories
     {
         public PatientRepository(IDatabaseFactory databaseFactory) : base(databaseFactory) {}
 
-        public override async Task Save(Patient entity)
+        public override async Task<bool> Save(Patient entity)
         {
             await using var ctx = this.DatabaseFactory.Create();
 
             entity.ArriveTime = DateTime.Now;
             
             await ctx.GetContext().AddAsync(entity);
-            await ctx.GetContext().SaveChangesAsync();
+            return await ctx.GetContext().SaveChangesAsync() > 0;
         }
 
         public override async Task<IEnumerable<Patient>> WhereMulti(Expression<Func<Patient, bool>> expression)

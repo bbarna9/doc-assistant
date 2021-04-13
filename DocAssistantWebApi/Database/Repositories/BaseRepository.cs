@@ -61,12 +61,12 @@ namespace DocAssistantWebApi.Database.Repositories
             return await ctx.GetContext().SaveChangesAsync() > 0;
         }
 
-        public virtual async Task Save(T entity)
+        public virtual async Task<bool> Save(T entity)
         {
             await using var ctx = this.DatabaseFactory.Create();
 
             await ctx.GetContext().AddAsync(entity);
-            await ctx.GetContext().SaveChangesAsync();
+            return await ctx.GetContext().SaveChangesAsync() > 0;
         }
         public async Task<int> DeleteWhere(Expression<Func<T, bool>> expression)
         {
