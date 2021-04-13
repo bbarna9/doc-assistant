@@ -7,16 +7,15 @@ using System.Linq;
 using System.Reflection;
 using DocAssistantWebApi.Database.Factories;
 using Microsoft.EntityFrameworkCore;
-using AssistantModel = DocAssistant_Common.Models.Assistant;
 
-namespace DocAssistantWebApi.Database.Repositories.Assistant
+namespace DocAssistantWebApi.Database.Repositories
 {
-    public class AssistantRepository : BaseRepository<AssistantModel>,IAssistantRepository<AssistantModel>
+    public class AssistantRepository : BaseRepository<Assistant>
     {
         public AssistantRepository(IDatabaseFactory databaseFactory) : base(databaseFactory)
         {
         }
-        public override async Task<bool> Update(AssistantModel entity)
+        public override async Task<bool> Update(Assistant entity)
         {
             await using var ctx = new SQLiteDatabaseContext();
             
