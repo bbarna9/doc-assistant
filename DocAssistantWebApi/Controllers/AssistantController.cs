@@ -47,7 +47,7 @@ namespace DocAssistantWebApi.Controllers
             };
             
             
-           await this._assistantRepository.Save(assistant);
+            await this._assistantRepository.Save(assistant);
 
             return Ok();
         }
