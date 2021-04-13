@@ -38,8 +38,6 @@ namespace DocAssistantWebApi.Database.Repositories
         }
         public static IEnumerable<(string, object)> GetUpdatedProperties(T original,T updated)
         {
-            // Get modified properties that does not have FixedAttribute (not modifiable)
-            
             var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.IgnoreCase |
                                                      BindingFlags.Instance | BindingFlags.NonPublic);
             var updatedProperties = new List<(string, object)>();
