@@ -74,17 +74,15 @@ namespace DocAssistantWebApi.Controllers
         {
             var accountType = (Roles)HttpContext.Items["AccountType"];
             
-            long docId;
-
             if (accountType == Roles.Assistant)
             {
                 var assistant =
                     await this._assistantRepository.Where(assistant => assistant.Id == (long) HttpContext.Items["Id"]);
 
-                docId = assistant.DoctorId;
+                patient.DoctorId = assistant.DoctorId;
             }
             else
-                docId = (long)HttpContext.Items["Id"];
+                patient.DoctorId = (long)HttpContext.Items["Id"];
 
             var isSSNUnique = await this._patientRepository.Where(entity => entity.SSN == patient.SSN) == null;
             if (!isSSNUnique)
@@ -96,13 +94,8 @@ namespace DocAssistantWebApi.Controllers
                     StatusCode = 400
                 };
             }
-            
-            patient.ArriveTime = DateTime.Now;
 
-            var doctor = await this._doctorRepository.Where(doctor => doctor.Id == docId);
-            doctor.Patients.Add(patient);
-            
-            if(!await this._doctorRepository.Update(doctor))
+            if(!await this._patientRepository.Save(patient))
                 throw new GenericRequestException
                 {
                     Title = "Failed to add patient",
