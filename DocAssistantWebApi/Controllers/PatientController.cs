@@ -177,5 +177,43 @@ namespace DocAssistantWebApi.Controllers
 
             return Ok();
         }
+
+        [Authorize(Policy = "DoctorRequirement")]
+        [Produces("application/json")]
+        [Route("api/patient/diagnosis")]
+        [HttpPost]
+        public async Task<ActionResult> AddDiagnosis([FromQuery(Name = "id")] long id,[FromBody] Diagnosis diagnosis)
+        {
+            var check = await this._patientRepository.Where(entity => entity.Id == id);
+            if(check == null)
+                throw new GenericRequestException
+                {
+                    Title = "Failed to create a new diagnosis",
+                    Error = "Patient does not exist",
+                    StatusCode = 400
+                };
+            
+            if(check.DoctorId != (long)HttpContext.Items["Id"])
+                throw new GenericRequestException
+                {
+                    Title = "Failed to create a new diagnosis",
+                    Error = "Patient belongs to a different doctor",
+                    StatusCode = 400
+                };
+           
+            check.Diagnoses.Add(diagnosis);
+
+            if (!await this._patientRepository.Update(check))
+            {
+                throw new GenericRequestException
+                {
+                    Title = "Failed to delete patient data",
+                    Error = "No changes were made",
+                    StatusCode = 400
+                };
+            }
+            
+            return Ok();
+        }
     }
 }
