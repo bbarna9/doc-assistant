@@ -12,6 +12,7 @@ namespace DocAssistantWebApi.Database
         public DbSet<Doctor> Doctors { get; set; }
         public DbSet<Assistant> Assistants { get; set; }
         public DbSet<Patient> Patients { get; set; }
+        public DbSet<Diagnosis> Diagnoses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
