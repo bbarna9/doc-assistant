@@ -15,7 +15,7 @@ namespace DocAssistantWebApi.Tests
     [TestClass]
     public class AssistantControllerUnitTests
     {
-        private Mock<IRepository<Assistant>> _mockAssistantRepository;
+        private MockRepository<Assistant> _mockAssistantRepository;
         private AssistantController _mockAssistantController;
 
         public AssistantControllerUnitTests()
