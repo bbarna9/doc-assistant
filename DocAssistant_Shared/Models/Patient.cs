@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
@@ -52,11 +53,8 @@ namespace DocAssistant_Common.Models
         [Required] public DateTime DateOfBirth { get; set; }
         
         public DateTime ArriveTime { get; set; }
-
-        public Patient()
-        {
-           
-        }
         
+        public List<Diagnosis> Diagnoses { get; set; } = new List<Diagnosis>();
+
     }
 }
