@@ -104,5 +104,17 @@ namespace DocAssistantWebApi.Tests
             // Assert
             Assert.AreEqual(typeof(OkResult),result.GetType());
         }
+        [TestMethod]
+        public async Task UpdateAssistantData_ShouldPassUpdate()
+        {
+            // Arrange
+            var assistant = new Assistant();
+            
+            // Act
+            var result = await _mockAssistantController.UpdateAssistantData(assistant);
+            
+            // Assert
+            Assert.AreEqual(typeof(OkResult), result.GetType());
+        }
     }
 }
