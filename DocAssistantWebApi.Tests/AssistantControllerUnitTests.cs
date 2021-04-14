@@ -25,12 +25,16 @@ namespace DocAssistantWebApi.Tests
         
         private AssistantController SetupDefaultController()
         {
-            _mockAssistantRepository = new Mock<IRepository<Assistant>>();
+            _mockAssistantRepository = new MockRepository<Assistant>();
 
-            var assistantController = new AssistantController(_mockAssistantRepository.Object);
+            var assistantController = new AssistantController(_mockAssistantRepository);
             assistantController.ControllerContext = new Mock<ControllerContext>().Object;
             assistantController.ControllerContext.HttpContext = new DefaultHttpContext();
-            assistantController.HttpContext.Items = new Dictionary<object, object?> {{"Id", 1L}};
+            assistantController.HttpContext.Items = new Dictionary<object, object?>
+            {
+                {"Id", 1L},
+                {"AccountType",Filters.Roles.Assistant}
+            };
             
             return assistantController;
         }
@@ -90,8 +94,6 @@ namespace DocAssistantWebApi.Tests
         public async Task RegisterAssistant_ShouldPassRegistration(string username, string password)
         {
             // Arrange
-            _mockAssistantRepository.Reset();
-            
             var assistantCredentials = new Credentials
             {
                 Username = username,
