@@ -8,6 +8,13 @@ namespace DocAssistant_Common.Models
 {
     public sealed class Patient : Person
     {
+
+        public enum GenderEnum
+        {
+            Male,
+            Female
+        }
+        
         [Fixed] [ForeignKey("DoctorId")] public long DoctorId { get; set; }
 
         [Required] 
@@ -16,8 +23,10 @@ namespace DocAssistant_Common.Models
         [Required] 
         [CommonValidation("^[^~!@#$%^&*\\(\\)-=_+\\{\\}\\[\\];\\\":<>\\/?,.|\\\\]{1,50}$")] 
         public override string LastName { get; set; }
-      //  [Required] [AddressValidation] public Address Address { get; set; }
-      
+        
+        [Required]
+        public GenderEnum Gender { get; set; }
+
         [Required]
         [CountryValidation] 
         public string Country { get; set; }
