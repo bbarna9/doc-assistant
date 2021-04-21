@@ -9,7 +9,6 @@ namespace DocAssistant_Common.Models
     {
         [Key] public int Id { get; set; }
         [Fixed] [ForeignKey("PatientId")] public long PatientId { get; set; }
-        [Required] [CommonValidation("^.{1,35}$")] public string Title { get; set; }
         [Required] [CommonValidation("^.{1,500}$")] public string Description { get; set; }
         [Required] public DateTime Date { get; set; }
     }
