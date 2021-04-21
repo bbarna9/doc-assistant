@@ -29,8 +29,8 @@ namespace DocAssistantWebApi.Controllers
 
         [Authorize(Policy = "DoctorRequirement")]
         [Produces("application/json")]
-        [Route("api/patient/load")]
-        [HttpPost]
+        [Route("api/patient")]
+        [HttpGet]
         public async Task<ActionResult> LoadPatient([FromQuery(Name = "type")] string type, [FromQuery(Name = "id")] long? id)
         {
             long docId = (long) HttpContext.Items["Id"];
