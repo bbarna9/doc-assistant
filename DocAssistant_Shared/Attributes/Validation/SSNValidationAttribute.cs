@@ -8,18 +8,7 @@ namespace DocAssistant_Common.Attributes
 {
     public class SSNValidationAttribute : ValidationAttribute
     {
-        /*public override bool IsValid([NotNull] object value)
-        {
-            ushort[] taj = (ushort[]) value;
-            
-            if (taj.Length != 9) return false;
-            
-            foreach (var number in taj)
-                if (number > 9) return false;
 
-            return true;
-        }*/
-        
         private readonly Regex allowedPattern = new Regex("^[0-9-]+$");
 
         public override bool IsValid([NotNull] object value)
