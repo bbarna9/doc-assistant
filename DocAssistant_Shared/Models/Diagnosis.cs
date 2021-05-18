@@ -11,5 +11,20 @@ namespace DocAssistant_Common.Models
         [Fixed] [ForeignKey("PatientId")] public long PatientId { get; set; }
         [Required] [CommonValidation("^.{1,500}$")] public string Description { get; set; }
         [Required] public DateTime Date { get; set; }
+
+        private bool Equals(Diagnosis other)
+        {
+            return Id == other.Id;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return ReferenceEquals(this, obj) || obj is Diagnosis other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return Id;
+        }
     }
 }
