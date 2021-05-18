@@ -17,13 +17,11 @@ namespace DocAssistantWebApi.Controllers
     {
 
         private readonly IRepository<Patient> _patientRepository;
-        private readonly IRepository<Doctor> _doctorRepository;
         private readonly IRepository<Assistant> _assistantRepository;
 
-        public PatientController(IRepository<Patient> repository,IRepository<Doctor> doctorRepository,IRepository<Assistant> assistantRepository)
+        public PatientController(IRepository<Patient> repository,IRepository<Assistant> assistantRepository)
         {
             this._patientRepository = repository;
-            this._doctorRepository = doctorRepository;
             this._assistantRepository = assistantRepository;
         }
 
