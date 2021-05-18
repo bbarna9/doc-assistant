@@ -13,12 +13,12 @@ using Moq;
 namespace DocAssistantWebApi.Tests
 {
     [TestClass]
-    public class AssistantControllerUnitTests
+    public class AssistantControllerTests
     {
         private MockRepository<Assistant> _mockAssistantRepository;
         private AssistantController _mockAssistantController;
 
-        public AssistantControllerUnitTests()
+        public AssistantControllerTests()
         {
             _mockAssistantController = this.SetupDefaultController();
         }
