@@ -29,7 +29,7 @@ namespace DocAssistant_Common.Models
         public GenderEnum Gender { get; set; }
 
         [Required]
-        [CountryValidation] 
+        [CommonValidation("^[a-zA-Z_\\- ]+$")] 
         public string Country { get; set; }
         [Required]
         [StateValidation(minLength: 1, maxLength: 255, invalidCharacters: new char[] {'~','!','@','#','$','%','^','&','*','(',')','_','=','+','{','}',';','\"','<','>','?','\\','/','.','|'})] 
@@ -41,7 +41,7 @@ namespace DocAssistant_Common.Models
         [CommonValidation("^.{1,250}$")]
         public string Street { get; set; }
         [Required]
-        [ZIPValidation(minLength: 1, maxLength: 10)] 
+        [CommonValidation("^.{1,10}$")] 
         public string ZIP { get; set; }
         
         [Required]
