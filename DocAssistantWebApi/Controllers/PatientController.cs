@@ -29,7 +29,7 @@ namespace DocAssistantWebApi.Controllers
         [Produces("application/json")]
         [Route("api/patient")]
         [HttpGet]
-        public async Task<ActionResult> LoadPatient([FromQuery(Name = "type")] string type, [FromQuery(Name = "id")] long? id)
+        public virtual async Task<ActionResult> LoadPatient([FromQuery(Name = "type")] string type, [FromQuery(Name = "id")] long? id)
         {
             long docId = (long) HttpContext.Items["Id"];
             

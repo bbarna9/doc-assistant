@@ -23,7 +23,7 @@ namespace DocAssistantWebApi.Controllers
         [Route("/api/auth")]
         [Produces("application/json")]
         [HttpPost]
-        public async Task<ActionResult> Auth([FromQuery(Name = "type")] string type,[FromBody] Credentials credentials)
+        public virtual async Task<ActionResult> Auth([FromQuery(Name = "type")] string type,[FromBody] Credentials credentials)
         {
             object response = null;
             switch (type)
@@ -65,7 +65,7 @@ namespace DocAssistantWebApi.Controllers
         [Route("/api/logout")]
         [Produces("application/json")]
         [HttpPost]
-        public async Task<ActionResult> Logout([FromQuery(Name = "type")] string type)
+        public virtual async Task<ActionResult> Logout([FromQuery(Name = "type")] string type)
         {
             long userId = (long) HttpContext.Items["Id"];
             
