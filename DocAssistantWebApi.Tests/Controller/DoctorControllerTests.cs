@@ -19,14 +19,13 @@ namespace DocAssistantWebApi.Tests
 
         public DoctorControllerTests()
         {
+            _mockDoctorRepository = new MockRepository<Doctor>();
+            _mockPatientRepository = new MockRepository<Patient>();
             _mockDoctorController = SetupDefaultController();
         }
         
         private DoctorController SetupDefaultController()
         {
-            _mockDoctorRepository = new MockRepository<Doctor>();
-            _mockPatientRepository = new MockRepository<Patient>();
-
             var doctorController = new DoctorController(_mockDoctorRepository,_mockPatientRepository);
             doctorController.ControllerContext = new Mock<ControllerContext>().Object;
             doctorController.ControllerContext.HttpContext = new DefaultHttpContext();

@@ -20,13 +20,12 @@ namespace DocAssistantWebApi.Tests
 
         public AssistantControllerTests()
         {
+            _mockAssistantRepository = new MockRepository<Assistant>();
             _mockAssistantController = this.SetupDefaultController();
         }
         
         private AssistantController SetupDefaultController()
         {
-            _mockAssistantRepository = new MockRepository<Assistant>();
-
             var assistantController = new AssistantController(_mockAssistantRepository);
             assistantController.ControllerContext = new Mock<ControllerContext>().Object;
             assistantController.ControllerContext.HttpContext = new DefaultHttpContext();
