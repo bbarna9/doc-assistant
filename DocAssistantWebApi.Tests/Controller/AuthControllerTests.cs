@@ -12,15 +12,6 @@ namespace DocAssistantWebApi.Tests
     [TestClass]
     public class AuthControllerTests
     {
-        private Mock<AuthController> _authController;
-
-        public AuthControllerTests()
-        {
-            var mockDoctorAuthService = new Mock<IAuthService<Doctor>>();
-            var mockAssistantAuthService = new Mock<IAuthService<Assistant>>();
-
-            _authController = new Mock<AuthController>(mockDoctorAuthService.Object,mockAssistantAuthService.Object);
-        }
 
         [TestMethod]
         public async Task AuthDoctor_ShouldReturnOkResponse()
@@ -29,36 +20,54 @@ namespace DocAssistantWebApi.Tests
 
             var type = "doctor";
             var credentials = new Credentials();
+
+            var mockDoctorAuthService = new Mock<IAuthService<Doctor>>();
+            mockDoctorAuthService.Setup(mock => mock.Auth(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new Doctor());
             
-            _authController.Setup(mock => mock.Auth(type, credentials))
-               .ReturnsAsync(new OkResult());
+            var mockAssitantAuthService = new Mock<IAuthService<Assistant>>();
             
+            var authController = new AuthController(mockDoctorAuthService.Object,mockAssitantAuthService.Object);
+
             // Act
 
-            var result = await _authController.Object.Auth(type,credentials);
+            var result = await authController.Auth(type,credentials);
 
             // Assert
+
+            var okResponse = result as OkObjectResult;
             
-            Assert.AreEqual(typeof(OkResult), result.GetType());
+            Assert.IsNotNull(okResponse);
+
+            var token = okResponse.Value;
+            
+            Assert.IsNotNull(token);
         }
         [TestMethod]
-        public async Task AuthDoctor_ShouldReturnBadRequestResponse()
+        public async Task AuthDoctor_ShouldFailAuth()
         {
             // Arrange
 
             var type = "doctor";
             var credentials = new Credentials();
+
+            var mockDoctorAuthService = new Mock<IAuthService<Doctor>>();
+            mockDoctorAuthService.Setup(mock => mock.Auth(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(null as Doctor);
             
-            _authController.Setup(mock => mock.Auth(type, credentials))
-                .ReturnsAsync(new BadRequestResult());
+            var mockAssitantAuthService = new Mock<IAuthService<Assistant>>();
             
+            var authController = new AuthController(mockDoctorAuthService.Object,mockAssitantAuthService.Object);
+
             // Act
 
-            var result = await _authController.Object.Auth(type,credentials);
+            var result = await authController.Auth(type,credentials);
 
             // Assert
+
+            var okResponse = result as UnauthorizedResult;
             
-            Assert.AreEqual(typeof(BadRequestResult), result.GetType());
+            Assert.IsNotNull(okResponse);
         }
         [TestMethod]
         public async Task AuthAssistant_ShouldReturnOkResponse()
@@ -67,111 +76,54 @@ namespace DocAssistantWebApi.Tests
 
             var type = "assistant";
             var credentials = new Credentials();
+
+            var mockDoctorAuthService = new Mock<IAuthService<Doctor>>();
+
+            var mockAssitantAuthService = new Mock<IAuthService<Assistant>>();
+            mockAssitantAuthService.Setup(mock => mock.Auth(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new Assistant());
             
-            _authController.Setup(mock => mock.Auth(type, credentials))
-                .ReturnsAsync(new OkResult());
-            
+            var authController = new AuthController(mockDoctorAuthService.Object,mockAssitantAuthService.Object);
+
             // Act
 
-            var result = await _authController.Object.Auth(type,credentials);
+            var result = await authController.Auth(type,credentials);
 
             // Assert
+
+            var okResponse = result as OkObjectResult;
             
-            Assert.AreEqual(typeof(OkResult), result.GetType());
+            Assert.IsNotNull(okResponse);
+
+            var token = okResponse.Value;
+            
+            Assert.IsNotNull(token);
         }
         [TestMethod]
-        public async Task AuthAssistant_ShouldReturnBadRequestResponse()
+        public async Task AuthAssistant_ShouldFailAuth()
         {
             // Arrange
 
-            var type = "assistant";
+            var type = "doctor";
             var credentials = new Credentials();
+
+            var mockDoctorAuthService = new Mock<IAuthService<Doctor>>();
+
+            var mockAssitantAuthService = new Mock<IAuthService<Assistant>>();
+            mockAssitantAuthService.Setup(mock => mock.Auth(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(null as Assistant);
             
-            _authController.Setup(mock => mock.Auth(type, credentials))
-                .ReturnsAsync(new BadRequestResult());
-            
+            var authController = new AuthController(mockDoctorAuthService.Object,mockAssitantAuthService.Object);
+
             // Act
 
-            var result = await _authController.Object.Auth(type,credentials);
+            var result = await authController.Auth(type,credentials);
 
             // Assert
+
+            var okResponse = result as UnauthorizedResult;
             
-            Assert.AreEqual(typeof(BadRequestResult), result.GetType());
-        }
-        
-        [TestMethod]
-        public async Task LogOutDoctor_ShouldReturnOkResponse()
-        {
-            // Arrange
-
-            var type = "doctor";
-
-            _authController.Setup(mock => mock.Logout(type))
-                .ReturnsAsync(new OkResult());
-            
-            // Act
-
-            var result = await _authController.Object.Logout(type);
-
-            // Assert
-            
-            Assert.AreEqual(typeof(OkResult), result.GetType());
-        }
-        
-        [TestMethod]
-        public async Task LogOutDoctor_ShouldReturnBadRequestResponse()
-        {
-            // Arrange
-
-            var type = "doctor";
-
-            _authController.Setup(mock => mock.Logout(type))
-                .ReturnsAsync(new BadRequestResult());
-            
-            // Act
-
-            var result = await _authController.Object.Logout(type);
-
-            // Assert
-            
-            Assert.AreEqual(typeof(BadRequestResult), result.GetType());
-        }
-        
-        [TestMethod]
-        public async Task LogOutAssistant_ShouldReturnOkResponse()
-        {
-            // Arrange
-
-            var type = "assistant";
-
-            _authController.Setup(mock => mock.Logout(type))
-                .ReturnsAsync(new OkResult());
-            
-            // Act
-
-            var result = await _authController.Object.Logout(type);
-
-            // Assert
-            
-            Assert.AreEqual(typeof(OkResult), result.GetType());
-        }
-        [TestMethod]
-        public async Task LogOutAssistant_ShouldReturnBadRequestResponse()
-        {
-            // Arrange
-
-            var type = "assistant";
-
-            _authController.Setup(mock => mock.Logout(type))
-                .ReturnsAsync(new BadRequestResult());
-            
-            // Act
-
-            var result = await _authController.Object.Logout(type);
-
-            // Assert
-            
-            Assert.AreEqual(typeof(BadRequestResult), result.GetType());
+            Assert.IsNotNull(okResponse);
         }
     }
 }

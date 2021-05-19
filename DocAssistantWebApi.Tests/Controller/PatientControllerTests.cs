@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using DocAssistant_Common.Models;
 using DocAssistantWebApi.Controllers;
 using DocAssistantWebApi.Database.Repositories;
+using DocAssistantWebApi.Errors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -14,50 +16,53 @@ namespace DocAssistantWebApi.Tests
     [TestClass]
     public class PatientControllerTests
     {
-        private Mock<IRepository<Patient>> _mockPatientRepository;
-        private Mock<IRepository<Assistant>> _mockAssistantRepository;
-        private Mock<PatientController> _patientController;
 
-        public PatientControllerTests()
+        private PatientController CreatePatientController(IRepository<Patient> mockPatientRepository, IRepository<Assistant> mockAssistantRepository)
         {
-            _mockPatientRepository = new Mock<IRepository<Patient>>();
-            _mockAssistantRepository = new Mock<IRepository<Assistant>>();
+            var patientController = new PatientController(mockPatientRepository,mockAssistantRepository);
+            patientController.ControllerContext = new Mock<ControllerContext>().Object;
+            patientController.ControllerContext.HttpContext = new DefaultHttpContext();
+            patientController.HttpContext.Items = new Dictionary<object, object?>
+            {
+                {"Id", 1L},
+                {"AccountType",Filters.Roles.Doctor}
+            };
 
-            _patientController = new Mock<PatientController>(_mockPatientRepository.Object,_mockAssistantRepository.Object);
+            return patientController;
         }
-
+        
         [TestMethod]
         public async Task LoadPatient_ShouldLoadSingleEntity()
         {
             // Arrange
             var type = "single";
-            var patientId = 1L;
 
-            _patientController.Setup(mock => mock.LoadPatient(type, 1L))
-               .ReturnsAsync(new OkResult());
-            
+            var patient = new Patient();
+            patient.Id = 1L;
+            patient.DoctorId = 1L;
+
+            var mockPatientRepository = new Mock<IRepository<Patient>>();
+            mockPatientRepository.Setup(mock => mock.Where(It.IsAny<Expression<Func<Patient,bool>>>()))
+                .ReturnsAsync(patient);
+
+            var mockAssistantRepository = new Mock<IRepository<Assistant>>();
+
+            var patientController =
+                CreatePatientController(mockPatientRepository.Object, mockAssistantRepository.Object);
+
             // Act
-            var result = await _patientController.Object.LoadPatient(type, patientId);
-
-            // Assert
-            Assert.AreEqual(typeof(OkResult),result.GetType());
-        }
-        
-        [TestMethod]
-        public async Task LoadPatient_ShouldNotLoadSingleEntity()
-        {
-            // Arrange
-            var type = "single";
-            var patientId = 1L;
-
-            _patientController.Setup(mock => mock.LoadPatient(type, 1L))
-                .ReturnsAsync(new BadRequestResult());
+            var result = await patientController.LoadPatient(type, patient.Id);
             
-            // Act
-            var result = await _patientController.Object.LoadPatient(type, patientId);
-
             // Assert
-            Assert.AreEqual(typeof(BadRequestResult),result.GetType());
+            
+            var objectResult = result as OkObjectResult;
+            
+            Assert.IsNotNull(objectResult);
+
+            var data = objectResult.Value as Patient;
+            
+            Assert.IsNotNull(data);
+            Assert.AreEqual(patient, data);
         }
         
         [TestMethod]
@@ -66,29 +71,172 @@ namespace DocAssistantWebApi.Tests
             // Arrange
             var type = "all";
 
-            _patientController.Setup(mock => mock.LoadPatient(type, null))
-                .ReturnsAsync(new OkResult());
+            var mockPatientRepository = new Mock<IRepository<Patient>>();
+            mockPatientRepository.Setup(mock => mock.WhereMulti(It.IsAny<Expression<Func<Patient,bool>>>()))
+                .ReturnsAsync(new List<Patient>());
             
-            // Act
-            var result = await _patientController.Object.LoadPatient(type,null);
+            var mockAssistantRepository = new Mock<IRepository<Assistant>>();
 
+            var patientController =
+                CreatePatientController(mockPatientRepository.Object, mockAssistantRepository.Object);
+
+            // Act
+            var result = await patientController.LoadPatient(type, null);
+            
             // Assert
-            Assert.AreEqual(typeof(OkResult),result.GetType());
+            var objectResult = result as OkObjectResult;
+            
+            Assert.IsNotNull(objectResult);
+
+            var data = objectResult.Value as IEnumerable<Patient>;
+            
+            Assert.IsNotNull(data);
         }
+        
+        
         [TestMethod]
-        public async Task LoadPatient_ShouldNotLoadAllEntity()
+        public async Task AddPatient_ShouldAddEntity()
         {
             // Arrange
-            var type = "all";
-
-            _patientController.Setup(mock => mock.LoadPatient(type, null))
-                .ReturnsAsync(new BadRequestResult());
+            var patient = new Patient
+            {
+                Id = 1,
+                DoctorId = 1,
+                SSN = "000-000-000"
+            };
             
+            var mockPatientRepository = new Mock<IRepository<Patient>>();
+            mockPatientRepository.Setup(mock => mock.Where(It.IsAny<Expression<Func<Patient,bool>>>()))
+                .ReturnsAsync((Patient) null);
+            mockPatientRepository.Setup(mock => mock.Save(It.IsAny<Patient>()))
+                .ReturnsAsync(true);
+            
+            var mockAssistantRepository = new Mock<IRepository<Assistant>>();
+            
+            var patientController =
+                CreatePatientController(mockPatientRepository.Object, mockAssistantRepository.Object);
             // Act
-            var result = await _patientController.Object.LoadPatient(type,null);
-
+            var result = await patientController.AddPatient(patient);
             // Assert
-            Assert.AreEqual(typeof(BadRequestResult),result.GetType());
+            var objectResult = result as OkResult;
+            
+            Assert.IsNotNull(objectResult);
+        }
+        
+        
+        [TestMethod]
+        public async Task AddPatient_ShouldNotAddEntity()
+        {
+            // Arrange
+            var patient = new Patient
+            {
+                Id = 1,
+                DoctorId = 1,
+                SSN = "000-000-000"
+            };
+            
+            var mockPatientRepository = new Mock<IRepository<Patient>>();
+            mockPatientRepository.Setup(mock => mock.Where(It.IsAny<Expression<Func<Patient,bool>>>()))
+                .ReturnsAsync(patient);
+            mockPatientRepository.Setup(mock => mock.Save(It.IsAny<Patient>()))
+                .ReturnsAsync(true);
+            
+            var mockAssistantRepository = new Mock<IRepository<Assistant>>();
+            
+            var patientController =
+                CreatePatientController(mockPatientRepository.Object, mockAssistantRepository.Object);
+            // Assert
+            await Assert.ThrowsExceptionAsync<GenericRequestException>(() => patientController.AddPatient(patient));
+        }
+
+        [TestMethod]
+        public async Task UpdateData_ShouldUpdateEntity()
+        {
+            // Arrange
+            var patient = new Patient
+            {
+                Id = 1,
+                DoctorId = 1,
+                SSN = "000-000-000"
+            };
+            
+            var mockPatientRepository = new Mock<IRepository<Patient>>();
+            mockPatientRepository.Setup(mock => mock.Where(It.IsAny<Expression<Func<Patient,bool>>>()))
+                .ReturnsAsync(patient);
+            
+            mockPatientRepository.Setup(mock => mock.UpdateChangedProperties(It.IsAny<Patient>()))
+                .ReturnsAsync(true);
+            
+            var mockAssistantRepository = new Mock<IRepository<Assistant>>();
+            
+            var patientController =
+                CreatePatientController(mockPatientRepository.Object, mockAssistantRepository.Object);
+            // Act
+            var result = await patientController.UpdateData(patient);
+            
+            // Assert
+            var objectResult = result as OkResult;
+            
+            Assert.IsNotNull(objectResult);
+        }
+
+        [TestMethod]
+        public async Task DeletePatient_ShouldDeleteEntity()
+        {
+            // Arrange
+            var patient = new Patient
+            {
+                Id = 1,
+                DoctorId = 1
+            };
+            
+            var mockPatientRepository = new Mock<IRepository<Patient>>();
+            mockPatientRepository.Setup(mock => mock.Where(It.IsAny<Expression<Func<Patient,bool>>>()))
+                .ReturnsAsync(patient);
+            mockPatientRepository.Setup(mock => mock.DeleteWhere(It.IsAny<Expression<Func<Patient,bool>>>()))
+                .ReturnsAsync(1);
+            
+            var mockAssistantRepository = new Mock<IRepository<Assistant>>();
+            
+            var patientController =
+                CreatePatientController(mockPatientRepository.Object, mockAssistantRepository.Object);
+            // Act
+            var result = await patientController.DeletePatient(patient.Id);
+            // Assert
+            var objectResult = result as OkResult;
+            
+            Assert.IsNotNull(objectResult);
+        }
+        
+        [TestMethod]
+        public async Task AddDiagnosis_ShouldUpdatePatientData()
+        {
+            // Arrange
+            var patient = new Patient
+            {
+                Id = 1,
+                DoctorId = 1
+            };
+
+            var diagnosis = new Diagnosis();
+            
+            var mockPatientRepository = new Mock<IRepository<Patient>>();
+            mockPatientRepository.Setup(mock => mock.Where(It.IsAny<Expression<Func<Patient,bool>>>()))
+                .ReturnsAsync(patient);
+            mockPatientRepository.Setup(mock => mock.Update(It.IsAny<Patient>()))
+                .ReturnsAsync(true);
+            
+            var mockAssistantRepository = new Mock<IRepository<Assistant>>();
+            var patientController =
+                CreatePatientController(mockPatientRepository.Object, mockAssistantRepository.Object);
+            // Act
+            
+            var result = await patientController.AddDiagnosis(patient.Id,diagnosis);
+            
+            // Assert
+            var objectResult = result as OkResult;
+            
+            Assert.IsNotNull(objectResult);
         }
     }
 }
