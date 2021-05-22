@@ -9,6 +9,8 @@ using DocAssistantWebApi.Errors;
 using DocAssistantWebApi.Filters;
 using DocAssistantWebApi.Services.Auth;
 using Microsoft.AspNetCore.Authorization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace DocAssistantWebApi.Controllers
 {
@@ -25,14 +27,26 @@ namespace DocAssistantWebApi.Controllers
             this._assistantRepository = assistantRepository;
         }
 
-        [Authorize(Policy = "DoctorRequirement")]
+        [Authorize(Policy = "AssistantRequirement")]
         [Produces("application/json")]
         [Route("api/patient")]
         [HttpGet]
         public virtual async Task<ActionResult> LoadPatient([FromQuery(Name = "type")] string type, [FromQuery(Name = "id")] long? id)
         {
-            long docId = (long) HttpContext.Items["Id"];
+            var accountType = (Roles)HttpContext.Items["AccountType"];
+            long docId;
             
+            if (accountType == Roles.Assistant)
+            {
+                var assistant =
+                    await this._assistantRepository.Where(assistant => assistant.Id == (long) HttpContext.Items["Id"]);
+
+                docId = assistant.DoctorId;
+            }
+            else
+                docId = (long)HttpContext.Items["Id"];
+            
+
             switch (type)
             {
                 case "single":
@@ -101,7 +115,12 @@ namespace DocAssistantWebApi.Controllers
                     StatusCode = 400
                 };
 
-            return Ok();
+            patient = await this._patientRepository.Where(entity => entity.SSN == patient.SSN);
+
+            return Ok(new
+            {
+                id = patient.Id
+            });
         }
 
         [Authorize(Policy = "DoctorRequirement")]
