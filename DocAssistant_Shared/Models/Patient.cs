@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Numerics;
 using System.Text;
 using DocAssistant_Common.Attributes;
 
@@ -15,7 +16,16 @@ namespace DocAssistant_Common.Models
             Male,
             Female
         }
-        
+
+        [Fixed]
+        [Key]
+        public long PatientId
+        {
+            get => Id;
+            set => this.Id = value;
+        }
+        [NotMapped]
+        public override long Id { get; set; }
         [Fixed] [ForeignKey("DoctorId")] public long DoctorId { get; set; }
 
         [Required] 
@@ -55,6 +65,6 @@ namespace DocAssistant_Common.Models
         public DateTime ArriveTime { get; set; }
         
         public List<Diagnosis> Diagnoses { get; set; } = new List<Diagnosis>();
-
+        
     }
 }
