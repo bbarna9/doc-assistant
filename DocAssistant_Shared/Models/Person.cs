@@ -6,7 +6,7 @@ namespace DocAssistant_Common.Models
     public abstract class Person
     {
 
-        [Fixed][Key] public long Id { get; set; }
+        public virtual long Id { get; set; }
         [CommonValidation("^[^~!@#$%^&*\\(\\)-=_+\\{\\}\\[\\];\\\":<>\\/?,.|\\\\]{1,50}$")] public virtual string FirstName { get; set; }
         [CommonValidation("^[^~!@#$%^&*\\(\\)-=_+\\{\\}\\[\\];\\\":<>\\/?,.|\\\\]{1,50}$")] public virtual string LastName { get; set; }
 
