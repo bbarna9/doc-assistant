@@ -118,7 +118,7 @@ namespace DocAssistantWebApi.Tests
             // Act
             var result = await patientController.AddPatient(patient);
             // Assert
-            var objectResult = result as OkResult;
+            var objectResult = result as OkObjectResult;
             
             Assert.IsNotNull(objectResult);
         }
@@ -164,7 +164,7 @@ namespace DocAssistantWebApi.Tests
             mockPatientRepository.Setup(mock => mock.Where(It.IsAny<Expression<Func<Patient,bool>>>()))
                 .ReturnsAsync(patient);
             
-            mockPatientRepository.Setup(mock => mock.UpdateChangedProperties(It.IsAny<Patient>()))
+            mockPatientRepository.Setup(mock => mock.UpdateChangedProperties(It.IsAny<Patient>(), null))
                 .ReturnsAsync(true);
             
             var mockAssistantRepository = new Mock<IRepository<Assistant>>();
