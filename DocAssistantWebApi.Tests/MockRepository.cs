@@ -13,6 +13,11 @@ namespace DocAssistantWebApi.Tests
             return Task.FromResult(entity);
         }
 
+        public Task<bool> UpdateChangedProperties(T entity, Expression<Func<T, bool>> expression = null)
+        {
+            return Task.FromResult(true);
+        }
+
         public Task<bool> UpdateChangedProperties(T entity)
         {
             return Task.FromResult(true);
@@ -37,7 +42,7 @@ namespace DocAssistantWebApi.Tests
         {
             return Task.FromResult<T>(null);
         }
-
+        
         public Task<IEnumerable<T>> WhereMulti(Expression<Func<T, bool>> expression)
         {
             return Task.FromResult<IEnumerable<T>>(null);
