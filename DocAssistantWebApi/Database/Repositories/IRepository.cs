@@ -13,7 +13,7 @@ namespace DocAssistantWebApi.Database.Repositories
     public interface IRepository<T> where T : class
     {
         Task<T> Get(T entity);
-        Task<bool> UpdateChangedProperties(T entity);
+        Task<bool> UpdateChangedProperties(T entity,Expression<Func<T, bool>> expression = null);
         Task<bool> Update(T entity);
         Task<bool> Save(T entity);
         Task<int> DeleteWhere(Expression<Func<T, bool>> expression);

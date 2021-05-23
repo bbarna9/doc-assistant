@@ -31,12 +31,13 @@ namespace DocAssistantWebApi.Database.Repositories
             return dbEntity;
         }
 
-        public virtual async Task<bool> UpdateChangedProperties(T entity)
+        public virtual async Task<bool> UpdateChangedProperties(T entity, Expression<Func<T, bool>> expression = null)
         {
             
             await using var ctx = this.DatabaseFactory.Create();
 
-            var dbEntity = await ctx.GetSet<T>().FirstOrDefaultAsync(e => e.Id == entity.Id);
+            var dbEntity = await ctx.GetSet<T>()
+                .FirstOrDefaultAsync(expression ?? (e => e.Id == entity.Id));
 
             if (dbEntity == null) return false;
 

@@ -16,6 +16,15 @@ namespace DocAssistantWebApi.Database.Repositories
     {
         public PatientRepository(IDatabaseFactory databaseFactory) : base(databaseFactory) {}
 
+        public override async Task<Patient> Where(Expression<Func<Patient,bool>> expression)
+        {
+            await using var ctx = this.DatabaseFactory.Create();
+
+            return await ctx.GetSet<Patient>()
+                .Include(patient => patient.Diagnoses)
+                .FirstOrDefaultAsync(expression);
+        }
+        
         public override async Task<bool> Save(Patient entity)
         {
             await using var ctx = this.DatabaseFactory.Create();
@@ -31,8 +40,14 @@ namespace DocAssistantWebApi.Database.Repositories
             await using var ctx = this.DatabaseFactory.Create();
 
             return await ctx.GetSet<Patient>().Where(expression)
+                .Include(patient => patient.Diagnoses)
                 .OrderBy(patient => patient.ArriveTime)
                 .ToListAsync();
+        }
+
+        public override Task<bool> UpdateChangedProperties(Patient entity, Expression<Func<Patient, bool>> expression = null)
+        {
+            return base.UpdateChangedProperties(entity, patient => patient.PatientId == entity.PatientId);
         }
     }
 }
