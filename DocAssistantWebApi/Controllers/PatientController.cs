@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using DocAssistant_Common.Models;
+using DocAssistant_Common.Utils;
 using DocAssistantWebApi.Database.Repositories;
 using DocAssistantWebApi.Errors;
 using DocAssistantWebApi.Filters;
@@ -51,7 +54,7 @@ namespace DocAssistantWebApi.Controllers
             {
                 case "single":
                 {
-                    var patient = await this._patientRepository.Where(patient => patient.Id == id);
+                    var patient = await this._patientRepository.Where(patient => patient.PatientId == id);
                     if (patient == null || patient.DoctorId != docId)
                     {
                         throw new GenericRequestException
@@ -115,12 +118,7 @@ namespace DocAssistantWebApi.Controllers
                     StatusCode = 400
                 };
 
-            patient = await this._patientRepository.Where(entity => entity.SSN == patient.SSN);
-
-            return Ok(new
-            {
-                id = patient.Id
-            });
+            return Ok(patient);
         }
 
         [Authorize(Policy = "DoctorRequirement")]
@@ -129,7 +127,7 @@ namespace DocAssistantWebApi.Controllers
         [HttpPatch]
         public async Task<ActionResult> UpdateData([FromBody] Patient patient)
         {
-            var check = await this._patientRepository.Where(entity => entity.Id == patient.Id);
+            var check = await this._patientRepository.Where(entity => entity.PatientId == patient.PatientId);
             if(check == null)
                 throw new GenericRequestException
                 {
@@ -163,7 +161,7 @@ namespace DocAssistantWebApi.Controllers
         [HttpDelete]
         public async Task<ActionResult> DeletePatient([FromQuery(Name = "id")] long id)
         {
-            var check = await this._patientRepository.Where(entity => entity.Id == id);
+            var check = await this._patientRepository.Where(entity => entity.PatientId == id);
             if(check == null)
                 throw new GenericRequestException
                 {
@@ -180,7 +178,7 @@ namespace DocAssistantWebApi.Controllers
                     StatusCode = 400
                 };
             
-            int count = await this._patientRepository.DeleteWhere(patient => patient.Id == id);
+            int count = await this._patientRepository.DeleteWhere(patient => patient.PatientId == id);
 
             if (count == 0)
             {
@@ -201,7 +199,8 @@ namespace DocAssistantWebApi.Controllers
         [HttpPost]
         public async Task<ActionResult> AddDiagnosis([FromQuery(Name = "id")] long id,[FromBody] Diagnosis diagnosis)
         {
-            var check = await this._patientRepository.Where(entity => entity.Id == id);
+            var check = await this._patientRepository.Where(entity => entity.PatientId == id);
+
             if(check == null)
                 throw new GenericRequestException
                 {
@@ -217,7 +216,9 @@ namespace DocAssistantWebApi.Controllers
                     Error = "Patient belongs to a different doctor",
                     StatusCode = 400
                 };
-           
+
+            diagnosis.Date = DateTime.Now;
+            
             check.Diagnoses.Add(diagnosis);
 
             if (!await this._patientRepository.Update(check))
@@ -231,6 +232,77 @@ namespace DocAssistantWebApi.Controllers
             }
             
             return Ok();
+        }
+        
+        [Authorize(Policy = "DoctorRequirement")]
+        [Produces("application/json")]
+        [Route("api/patient/diagnosis")]
+        [HttpDelete]
+        public async Task<ActionResult> DeleteDiagnosis([FromQuery(Name = "patientId")] long patientId,[FromQuery(Name = "diagnosisId")] long diagnosisId)
+        {
+       
+            var check = await this._patientRepository.Where(entity => entity.PatientId == patientId);
+
+            if(check == null)
+                throw new GenericRequestException
+                {
+                    Title = "Failed to delete the diagnosis",
+                    Error = "Patient does not exist",
+                    StatusCode = 400
+                };
+            
+            if(check.DoctorId != (long)HttpContext.Items["Id"])
+                throw new GenericRequestException
+                {
+                    Title = "Failed to delete the diagnosis",
+                    Error = "Patient belongs to a different doctor",
+                    StatusCode = 400
+                };
+
+            check.Diagnoses = check.Diagnoses.Where(diagnosis => diagnosis.Id != diagnosisId).ToList();
+
+            if (!await this._patientRepository.Update(check))
+            {
+                throw new GenericRequestException
+                {
+                    Title = "Failed to delete the diagnosis",
+                    Error = "No changes were made",
+                    StatusCode = 400
+                };
+            }
+            
+            return Ok();
+        }
+
+        [Authorize(Policy = "AssistantRequirement")]
+        [Produces("text/plain")]
+        [Route("api/patient/updates")]
+        [HttpGet]
+        public async Task<ActionResult> CheckForUpdates([FromQuery] string hash)
+        {
+            var accountType = (Roles)HttpContext.Items["AccountType"];
+            long docId;
+            
+            if (accountType == Roles.Assistant)
+            {
+                var assistant =
+                    await this._assistantRepository.Where(assistant => assistant.Id == (long) HttpContext.Items["Id"]);
+
+                docId = assistant.DoctorId;
+            }
+            else
+                docId = (long)HttpContext.Items["Id"];
+
+            using var sha = new SHA1Managed();
+            
+            var patients = await _patientRepository.WhereMulti(patient => patient.DoctorId == docId); 
+            
+            var computed = Convert.ToHexString(Security.ComputeHash(JArray.FromObject(patients).ToString(Formatting.None)));
+
+            if (computed.Equals(hash))
+                return StatusCode(200);
+            else
+                return StatusCode(205);
         }
     }
 }
